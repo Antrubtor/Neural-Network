@@ -8,8 +8,8 @@ Matrix* add(Matrix *matrix1, Matrix *matrix2)
     double *m2 = matrix2->data;
 
     Matrix *matrixR = malloc(sizeof(Matrix));
-    matrixR->sizeX = rows;
-    matrixR->sizeY = cols;
+    matrixR->sizeX = cols;
+    matrixR->sizeY = rows;
     matrixR->data = malloc(rows * cols * sizeof(double));
     double *r = matrixR->data;
 
@@ -64,8 +64,8 @@ Matrix* mul(Matrix *matrix1, Matrix *matrix2)
     double *m2 = matrix2->data;
 
     Matrix *matrixR = malloc(sizeof(Matrix));
-    matrixR->sizeX = r1;
-    matrixR->sizeY = c2;
+    matrixR->sizeX = c2;
+    matrixR->sizeY = r1;
     matrixR->data = malloc(r1 * c2 * sizeof(double));
     double *r = matrixR->data;
 
@@ -103,7 +103,7 @@ Matrix* transpose(Matrix *matrix)
 
 void printMatrix(Matrix mat)
 {
-    printf("Matrice de taille %d x %d :\n", mat.sizeY, mat.sizeX);
+    printf("Matrix size: %d x %d :\n", mat.sizeY, mat.sizeX);
     for (int i = 0; i < mat.sizeY; i++) {
         for (int j = 0; j < mat.sizeX; j++) {
             printf("%.2f\t", mat.data[i * mat.sizeX + j]);
