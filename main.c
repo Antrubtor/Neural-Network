@@ -22,7 +22,7 @@ int main()//(int argc, char *argv[])
 
 
 
-    // Juste mettre sous forme de malloc les tableaux précédents pour simplifier
+    // transform tabs to malloc
     double *X = malloc(X_TRAIN_SIZE * Y_TRAIN_SIZE * sizeof(double));
     for (size_t i = 0; i < Y_TRAIN_SIZE; i++) {
         for (size_t j = 0; j < X_TRAIN_SIZE; j++) {
@@ -34,6 +34,33 @@ int main()//(int argc, char *argv[])
         y[i] = yy[i];
     }
 
+
+
+    Matrix *W_list;
+    Matrix *b_list;
+    int dim[] = {2, 3, 4, 3, 1};
+    init_network(dim, DIMENSION, &W_list, &b_list);
+
+    double *activations
+    forward_propagation()
+
+    for (size_t i = 0; i < DIMENSION - 1; i++)
+    {
+        free((W_list[i]).data);
+        free((b_list[i]).data);
+    }
+    free(y);
+    free(X);
+    free(W_list);
+    free(b_list);
+
+
+    return 0;
+}
+
+
+
+/*
     printf("X: ");
     for (size_t i = 0; i < Y_TRAIN_SIZE * X_TRAIN_SIZE; i++) printf("%f, ", X[i]);
     printf("\n");
@@ -43,30 +70,4 @@ int main()//(int argc, char *argv[])
 
 
 
-    Matrix *W_list;
-    Matrix *b_list;
-    int dim[] = {2, 3, 4, 3, 1};
-    init_network(dim, DIMENSION, &W_list, &b_list);
-
-    printf("cc\n");
-
-    printMatrix(W_list[0]);
-//    printMatrix(W_list[1]);
-    printMatrix(W_list[2]);
-    for (size_t i = 0; i < DIMENSION - 1; i++)
-    {
-
-        printMatrix(W_list[i]);
-
-        free((W_list[i]).data);
-        free((b_list[i]).data);
-    }
-    free(y);
-    free(X);
-    printf("cc\n");
-    free(W_list);
-    free(b_list);
-
-
-    return 0;
-}
+ */

@@ -14,18 +14,14 @@ void init_network(int dim[], int dimsize, Matrix **W_list, Matrix **b_list)
     *b_list = malloc((dimsize - 1) * sizeof(Matrix));
     for (int i = 1; i < dimsize; i++)
     {
-        printf("i %i\n", i);
         Matrix *tmp_W = &(*W_list)[i - 1];
         tmp_W->sizeX = dim[i];
         tmp_W->sizeY = dim[i - 1];
         tmp_W->data = malloc(tmp_W->sizeX * tmp_W->sizeY * sizeof(double));
         for (int j = 0; j < tmp_W->sizeX * tmp_W->sizeY; j++)
             tmp_W->data[j] = 1; /*random_gaussian();*/
-        printf("cc\n");
         Matrix *tmp_b = &(*b_list)[i - 1];
-        printf("cc\n");
         tmp_b->sizeX = dim[1];
-        printf("cc\n");
         tmp_b->sizeY = dim[i];
         tmp_b->data = malloc(tmp_b->sizeY * sizeof(double));
         for (int j = 0; j < tmp_b->sizeY; j++)
@@ -37,9 +33,17 @@ void init_network(int dim[], int dimsize, Matrix **W_list, Matrix **b_list)
     printMatrix((*W_list)[3]);
 }
 
-//void forward_propagation(double **X, double **W, double b, double **A)
-//{
-//}
+void forward_propagation(double **X, double **W, double b, double **A)
+{
+
+
+
+
+    *A = malloc(y_size_X * sizeof(double));
+    mul(X, W, y_size_X, x_size_X, 1, A);
+    for (size_t i = 0; i < y_size_X; i++)
+        (*A)[i] = 1 / (1 + exp(-((*A)[i] + b)));
+}
 //
 //void back_propagation(double **A, double **X, double *y, double **dW, double *db)
 //{
