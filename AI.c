@@ -55,11 +55,9 @@ void back_propagation(Matrix *y, Matrix *W_list, Matrix *A_list, Matrix **dW_gra
 {
     *dW_gradients = malloc((DIMENSION - 1) * sizeof(Matrix));
     *db_gradients = malloc((DIMENSION - 1) * sizeof(Matrix));
-
     Matrix *dZ = minus(&A_list[DIMENSION - 1], y);
     for (int i = DIMENSION - 2; i >= 0; i--)
     {
-        printf("i: %i\n", i);
         Matrix *tmp_dW = &(*dW_gradients)[DIMENSION - 2 - i];
         Matrix *tmp_tra_dW = transpose(&A_list[i]);
         Matrix *tmp_mul_dW = mul(dZ, tmp_tra_dW);
@@ -122,13 +120,23 @@ void back_propagation(Matrix *y, Matrix *W_list, Matrix *A_list, Matrix **dW_gra
 
 void update(Matrix *dW_gradients, Matrix *db_gradients, Matrix *W_list, Matrix *b_list, double learning_rate)
 {
-
+    for (int i = 0; i < DIMENSION - 1; i++)
+    {
+        for (int j = 0; j < W_list[i].sizeX * W_list[j].sizeX; j++)
+            W_list[i].data[j] = W_list[i].data[j] - learning_rate * dW_gradients[DIMENSION - 2 - i].data[j];
+        for (int j = 0; j < b_list[i].sizeX * b_list[j].sizeX; j++)
+            b_list[i].data[j] = b_list[i].data[j] - learning_rate * db_gradients[DIMENSION - 2 - i].data[j];
+    }
 }
 
-//void predict(double **X, double **W, double **b)
-//{
-//}
-//
+double predict(Matrix *X, Matrix *W_list, Matrix *b_list)
+{
+    Matrix *Acti;
+    forward_propagation(X, W_list, b_list, &Acti);
+    Matrix Af = Acti[DIMENSION - 1];
+    return Acti[DIMENSION - 1].data[0];
+}
+
 //double log_loss(double *A, double *y)
 //{
 //}
