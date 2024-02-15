@@ -32,8 +32,13 @@ void init_network(int dim[], Matrix **W_list, Matrix **b_list)
 void forward_propagation(Matrix *X, Matrix *W_list, Matrix *b_list, Matrix **A_list)
 {
     *A_list = malloc(DIMENSION * sizeof(Matrix));
-    memcpy(A_list[0], X, sizeof(Matrix)); //copy X in the new list
-    memcpy(A_list[0]->data, X->data, X->sizeX * X->sizeY * sizeof(double));
+    A_list[0]->sizeX = X->sizeX;
+    A_list[0]->sizeY = X->sizeY;
+    A_list[0]->data = malloc(X->sizeX * X->sizeY * sizeof(double));
+    for (int i = 0; i < X->sizeX * X->sizeY; i++)
+        A_list[0]->data[i] = X->data[i];
+//    memcpy(A_list[0], X, sizeof(Matrix)); //copy X in the new list, create some bugs
+//    memcpy(A_list[0]->data, X->data, X->sizeX * X->sizeY * sizeof(double));
     for (int i = 0; i < DIMENSION - 1; i++)
     {
         Matrix *Z = mul(&W_list[i], &(*A_list)[i]);
@@ -133,14 +138,57 @@ double predict(Matrix *X, Matrix *W_list, Matrix *b_list)
 {
     Matrix *Acti;
     forward_propagation(X, W_list, b_list, &Acti);
-    Matrix Af = Acti[DIMENSION - 1];
-    return Acti[DIMENSION - 1].data[0];
+    double pre = Acti[DIMENSION - 1].data[0];
+
+    for (int i = 0; i < DIMENSION; i++)
+        free(Acti[i].data);
+    free(Acti);
+    return pre;
 }
 
-//double log_loss(double *A, double *y)
-//{
-//}
-//
-//void neural_network()
-//{
-//}
+double log_loss(Matrix *y, Matrix *A)
+{
+    double loss = 0;
+    for (int i = 0; i < A->sizeX; i++) {
+        loss += -y->data[i] * log(A->data[i]) - (1 - y->data[i]) * log(1 - A->data[i]);
+    }
+    return loss;
+}
+
+void neural_network(Matrix *X, Matrix *y, int hidden_layers[], double learning_rate, int epoch, Matrix **W_list, Matrix **b_list)
+{
+    init_network(hidden_layers, W_list, b_list);
+    for (int i = 0; i < epoch; i++)
+    {
+        Matrix *A_list;
+        forward_propagation(X, *W_list, *b_list, &A_list);
+        Matrix *dW_gradients;
+        Matrix *db_gradients;
+        back_propagation(y, *W_list, A_list, &dW_gradients, &db_gradients);
+        update(dW_gradients, db_gradients, *W_list, *b_list, learning_rate);
+        printf("Log loss: %f\n", log_loss(y, &A_list[DIMENSION - 1]));
+        for (size_t j = 0; j < DIMENSION - 1; j++)
+        {
+            free((A_list[j + 1]).data);
+            free(dW_gradients[j].data);
+            free(db_gradients[j].data);
+        }
+        free(A_list[0].data);
+        free(A_list);
+        free(dW_gradients);
+        free(db_gradients);
+    }
+
+
+    for (size_t i = 0; i < DIMENSION - 1; i++)
+    {
+        printf("W_list:\n");
+        printMatrix((*W_list)[i]);
+    }
+    printf("\n\n\n\n\n\n\n\n\n\n");
+    for (size_t i = 0; i < DIMENSION - 1; i++)
+    {
+        printf("b_list:\n");
+        printMatrix((*b_list)[i]);
+    }
+}
