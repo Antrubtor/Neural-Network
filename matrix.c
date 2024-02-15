@@ -68,7 +68,6 @@ Matrix* mul(Matrix *matrix1, Matrix *matrix2)
     matrixR->sizeY = r1;
     matrixR->data = malloc(r1 * c2 * sizeof(double));
     double *r = matrixR->data;
-
     for (int i = 0; i < r1; i++) {
         for (int j = 0; j < c2; j++) {
             double add = 0;
@@ -106,7 +105,7 @@ void printMatrix(Matrix mat)
     printf("Matrix size: %d x %d :\n", mat.sizeY, mat.sizeX);
     for (int i = 0; i < mat.sizeY; i++) {
         for (int j = 0; j < mat.sizeX; j++) {
-            printf("%.2f\t", mat.data[i * mat.sizeX + j]);
+            printf("%.6f\t", mat.data[i * mat.sizeX + j]);
         }
         printf("\n");
     }

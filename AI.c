@@ -36,18 +36,18 @@ void forward_propagation(Matrix *X, Matrix *W_list, Matrix *b_list, Matrix **A)
     memcpy(A[0]->data, X->data, X->sizeX * X->sizeY * sizeof(double));
     for (int i = 0; i < DIMENSION - 1; i++)
     {
-        Matrix *Z_tmp = mul(&W_list[i], &(*A)[i]);
-        Matrix *Z = add(Z_tmp, &b_list[i]);
+        Matrix *Z = mul(&W_list[i], &(*A)[i]);
         Matrix *tmp_A = &(*A)[i + 1];
         tmp_A->sizeX = Z->sizeX;
         tmp_A->sizeY = Z->sizeY;
         tmp_A->data = malloc(Z->sizeX * Z->sizeY * sizeof(double));
         for (int j = 0; j < Z->sizeX * Z->sizeY; j++)
-            tmp_A->data[j] = 1 / (1 + exp(-(Z->data[j])));  //sigmoïd
+        {
+            double tmp = Z->data[j] + b_list[i].data[j % b_list[i].sizeX];
+            tmp_A->data[j] = 1 / (1 + exp(-(tmp)));
+        }
         free(Z->data);
-        free(Z_tmp->data);
         free(Z);
-        free(Z_tmp);
     }
 }
 //
