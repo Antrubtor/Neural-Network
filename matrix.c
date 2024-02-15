@@ -19,6 +19,25 @@ Matrix* add(Matrix *matrix1, Matrix *matrix2)
     return matrixR;
 }
 
+Matrix* minus(Matrix *matrix1, Matrix *matrix2)
+{
+    int rows = matrix1->sizeY;
+    int cols = matrix1->sizeX;
+    double *m1 = matrix1->data;
+    double *m2 = matrix2->data;
+
+    Matrix *matrixR = malloc(sizeof(Matrix));
+    matrixR->sizeX = cols;
+    matrixR->sizeY = rows;
+    matrixR->data = malloc(rows * cols * sizeof(double));
+    double *r = matrixR->data;
+
+    for (int i = 0; i < rows * cols; i++) {
+        r[i] = m1[i] - m2[i];
+    }
+    return matrixR;
+}
+
 Matrix* add_num(Matrix *matrix, double n)
 {
     int rows = matrix->sizeY;
@@ -33,6 +52,23 @@ Matrix* add_num(Matrix *matrix, double n)
 
     for (int i = 0; i < rows * cols; i++) {
         r[i] = m[i] + n;
+    }
+    return matrixR;
+}
+
+Matrix* columns_sum(Matrix *matrix)
+{
+    Matrix *matrixR = malloc(sizeof(Matrix));
+    matrixR->sizeX = 1;
+    matrixR->sizeY = matrix->sizeY;
+    matrixR->data = malloc(matrixR->sizeY * sizeof(double));
+
+    for (int i = 0; i < matrix->sizeY; i++) {
+        double sum = 0;
+        for (int j = 0; j < matrix->sizeX; j++) {
+            sum += matrix->data[i * matrix->sizeX + j];
+        }
+        matrixR->data[i] = sum;
     }
     return matrixR;
 }
@@ -76,6 +112,25 @@ Matrix* mul(Matrix *matrix1, Matrix *matrix2)
             }
             r[i * c2 + j] = add;
         }
+    }
+    return matrixR;
+}
+
+Matrix* mul_matrix(Matrix *matrix1, Matrix *matrix2)   //multiply every number from m1 to m2
+{
+    int rows = matrix1->sizeY;
+    int cols = matrix1->sizeX;
+    double *m1 = matrix1->data;
+    double *m2 = matrix2->data;
+
+    Matrix *matrixR = malloc(sizeof(Matrix));
+    matrixR->sizeX = rows;
+    matrixR->sizeY = cols;
+    matrixR->data = malloc(rows * cols * sizeof(double));
+    double *r = matrixR->data;
+
+    for (int i = 0; i < rows * cols; i++) {
+        r[i] = m1[i] * m2[i];
     }
     return matrixR;
 }

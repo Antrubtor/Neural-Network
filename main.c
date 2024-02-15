@@ -44,14 +44,29 @@ int main()//(int argc, char *argv[])
     Matrix *b_list;
     int dim[] = {2, 3, 4, 3, 1};
     init_network(dim, &W_list, &b_list);
-
+//    for (size_t i = 0; i < DIMENSION - 1; i++)
+//    {
+//        printf("W_list:\n");
+//        printMatrix(W_list[i]);
+//        printf("b_list:\n");
+//        printMatrix(b_list[i]);
+//    }
     Matrix *A_list;
     forward_propagation(X, W_list, b_list, &A_list);
-    for (size_t i = 0; i < DIMENSION; i++)
+//    for (size_t i = 0; i < DIMENSION; i++)
+//    {
+//        printMatrix(A_list[i]);
+//    }
+    Matrix *dW_gradients;
+    Matrix *db_gradients;
+    back_propagation(y, W_list, A_list, &dW_gradients, &db_gradients);
+    for (size_t i = 0; i < DIMENSION - 1; i++)
     {
-        printMatrix(A_list[i]);
+        printf("dW:\n");
+        printMatrix(dW_gradients[i]);
+        printf("db:\n");
+        printMatrix(db_gradients[i]);
     }
-
 
 
 
@@ -67,6 +82,8 @@ int main()//(int argc, char *argv[])
         free((W_list[i]).data);
         free((b_list[i]).data);
         free((A_list[i + 1]).data); //because of memcpy
+        free(dW_gradients[i].data);
+        free(db_gradients[i].data);
     }
 
     free(X->data);
@@ -77,7 +94,8 @@ int main()//(int argc, char *argv[])
     free(W_list);
     free(b_list);
     free(A_list);
-
+    free(dW_gradients);
+    free(db_gradients);
 
     return 0;
 }
