@@ -60,7 +60,7 @@ void back_propagation(Matrix *y, Matrix *W_list, Matrix *A_list, Matrix **dW_gra
     for (int i = DIMENSION - 2; i >= 0; i--)
     {
         printf("i: %i\n", i);
-        Matrix *tmp_dW = &(*dW_gradients)[DIMENSION - 1 - i];
+        Matrix *tmp_dW = &(*dW_gradients)[DIMENSION - 2 - i];
         Matrix *tmp_tra_dW = transpose(&A_list[i]);
         Matrix *tmp_mul_dW = mul(dZ, tmp_tra_dW);
         tmp_dW->sizeX = tmp_mul_dW->sizeX;
@@ -69,7 +69,7 @@ void back_propagation(Matrix *y, Matrix *W_list, Matrix *A_list, Matrix **dW_gra
         for (int j = 0; j < tmp_mul_dW->sizeX * tmp_mul_dW->sizeY; j++)
             tmp_dW->data[j] = tmp_mul_dW->data[j] / X_TRAIN_SIZE;
 
-        Matrix *tmp_db = &(*db_gradients)[DIMENSION - 1 - i];
+        Matrix *tmp_db = &(*db_gradients)[DIMENSION - 2 - i];
         Matrix *tmp_sum_db = columns_sum(dZ);
         tmp_db->sizeX = tmp_sum_db->sizeX;
         tmp_db->sizeY = tmp_sum_db->sizeY;
@@ -78,7 +78,6 @@ void back_propagation(Matrix *y, Matrix *W_list, Matrix *A_list, Matrix **dW_gra
             tmp_db->data[j] = tmp_sum_db->data[j] / X_TRAIN_SIZE;
         if (i > 0)
         {
-            printf("X: %i, Y: %i / i = %i\n", W_list[i].sizeX, W_list[i].sizeY, i);
             Matrix *tmp_t_dZ = transpose(&W_list[i]);
             Matrix *tmp_mul_dZ = mul(tmp_t_dZ, dZ);
             Matrix *tmp_1_dZ = mul_matrix(tmp_mul_dZ, &A_list[i]);
@@ -119,12 +118,13 @@ void back_propagation(Matrix *y, Matrix *W_list, Matrix *A_list, Matrix **dW_gra
     free(dZ->data);
     free(dZ);
 }
-//
-//
-//void update(double **dW, double db, double **W, double b, double learning_rate)
-//{
-//}
-//
+
+
+void update(Matrix *dW_gradients, Matrix *db_gradients, Matrix *W_list, Matrix *b_list, double learning_rate)
+{
+
+}
+
 //void predict(double **X, double **W, double **b)
 //{
 //}

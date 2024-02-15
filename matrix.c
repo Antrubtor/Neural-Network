@@ -142,8 +142,8 @@ Matrix* transpose(Matrix *matrix)
     double *m = matrix->data;
 
     Matrix *matrixR = malloc(sizeof(Matrix));
-    matrixR->sizeX = cols;
-    matrixR->sizeY = rows;
+    matrixR->sizeX = rows;
+    matrixR->sizeY = cols;
     matrixR->data = malloc(rows * cols * sizeof(double));
     double *r = matrixR->data;
 

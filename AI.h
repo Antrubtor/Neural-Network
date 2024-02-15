@@ -35,7 +35,7 @@ double random_gaussian();
 void init_network(int* dim, Matrix **W_list, Matrix **b_list);
 void forward_propagation(Matrix *X, Matrix *W_list, Matrix *b_list, Matrix **A);
 void back_propagation(Matrix *y, Matrix *W_list, Matrix *A_list, Matrix **dW_list, Matrix **db_list);
-void update(double **dW, double db, double **W, double b, double learning_rate);
+void update(Matrix *dW_gradients, Matrix *db_gradients, Matrix *W_list, Matrix *b_list, double learning_rate);
 void predict(double **X, double **W, double **b);
 double log_loss(double *A, double *y);
 void neural_network();

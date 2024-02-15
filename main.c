@@ -14,10 +14,11 @@ int main()//(int argc, char *argv[])
     };
 
     double yy[X_TRAIN_SIZE] = {
+            0,
             1,
-            0,
-            0,
-            1};
+            1,
+            0};
+    double learning_rate = 0.1;
 
 
     // transform tabs to Matrix
@@ -60,14 +61,14 @@ int main()//(int argc, char *argv[])
     Matrix *dW_gradients;
     Matrix *db_gradients;
     back_propagation(y, W_list, A_list, &dW_gradients, &db_gradients);
-    for (size_t i = 0; i < DIMENSION - 1; i++)
-    {
-        printf("dW:\n");
-        printMatrix(dW_gradients[i]);
-        printf("db:\n");
-        printMatrix(db_gradients[i]);
-    }
-
+//    for (size_t i = 0; i < DIMENSION - 1; i++)
+//    {
+//        printf("dW:\n");
+//        printMatrix(dW_gradients[i]);
+//        printf("db:\n");
+//        printMatrix(db_gradients[i]);
+//    }
+    update(dW_gradients, db_gradients, W_list, b_list, learning_rate);
 
 
 
