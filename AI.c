@@ -2,6 +2,7 @@
 
 double random_gaussian()
 {
+    return ((double)rand() / RAND_MAX) * 2 - 1;
     double u1 = (double)rand() / RAND_MAX;
     double u2 = (double)rand() / RAND_MAX;
     return sqrt(-2.0 * log(u1)) * cos(2.0 * M_PI * u2);
@@ -19,14 +20,36 @@ void init_network(int dim[], Matrix **W_list, Matrix **b_list)
         tmp_W->sizeY = dim[i];
         tmp_W->data = malloc(tmp_W->sizeX * tmp_W->sizeY * sizeof(double));
         for (int j = 0; j < tmp_W->sizeX * tmp_W->sizeY; j++)
-            tmp_W->data[j] = 1; /*random_gaussian();*/
+            tmp_W->data[j] = random_gaussian();
         Matrix *tmp_b = &(*b_list)[i - 1];
         tmp_b->sizeX = 1;
         tmp_b->sizeY = dim[i];
         tmp_b->data = malloc(tmp_b->sizeY * sizeof(double));
         for (int j = 0; j < tmp_b->sizeY; j++)
-            tmp_b->data[j] = 1; /*random_gaussian();*/
+            tmp_b->data[j] = random_gaussian();
     }
+    // test
+//    (&(*W_list)[0])->data[0] = 0.11;
+//    (&(*W_list)[0])->data[1] = 0.21;
+//    (&(*W_list)[0])->data[2] = 0.31;
+//    (&(*W_list)[0])->data[3] = 0.41;
+//    (&(*W_list)[0])->data[4] = 0.51;
+//    (&(*W_list)[0])->data[5] = 0.61;
+//    (&(*W_list)[0])->data[6] = 0.71;
+//    (&(*W_list)[0])->data[7] = 0.81;
+//
+//    (&(*W_list)[1])->data[0] = 0.82;
+//    (&(*W_list)[1])->data[1] = 0.72;
+//    (&(*W_list)[1])->data[2] = 0.62;
+//    (&(*W_list)[1])->data[3] = 0.52;
+//
+//
+//    (&(*b_list)[0])->data[0] = -0.13;
+//    (&(*b_list)[0])->data[1] = -0.23;
+//    (&(*b_list)[0])->data[2] = -0.33;
+//    (&(*b_list)[0])->data[3] = -0.43;
+//
+//    (&(*b_list)[1])->data[0] = 0.14;
 }
 
 void forward_propagation(Matrix *X, Matrix *W_list, Matrix *b_list, Matrix **A_list)
@@ -46,10 +69,14 @@ void forward_propagation(Matrix *X, Matrix *W_list, Matrix *b_list, Matrix **A_l
         tmp_A->sizeX = Z->sizeX;
         tmp_A->sizeY = Z->sizeY;
         tmp_A->data = malloc(Z->sizeX * Z->sizeY * sizeof(double));
-        for (int j = 0; j < Z->sizeX * Z->sizeY; j++)
+        for (int j = 0; j < Z->sizeY ; j++)
         {
-            double tmp = Z->data[j] + b_list[i].data[j % b_list[i].sizeX];
-            tmp_A->data[j] = 1 / (1 + exp(-(tmp)));
+            for (int k = 0; k < Z->sizeX; k++)
+            {
+                double tmp = Z->data[j * Z->sizeX + k] + b_list[i].data[j];
+                tmp_A->data[j * Z->sizeX + k] = 1 / (1 + exp(-(tmp)));
+            }
+
         }
         free(Z->data);
         free(Z);
@@ -127,9 +154,9 @@ void update(Matrix *dW_gradients, Matrix *db_gradients, Matrix *W_list, Matrix *
 {
     for (int i = 0; i < DIMENSION - 1; i++)
     {
-        for (int j = 0; j < W_list[i].sizeX * W_list[j].sizeX; j++)
+        for (int j = 0; j < W_list[i].sizeX * W_list[i].sizeY; j++)
             W_list[i].data[j] = W_list[i].data[j] - learning_rate * dW_gradients[DIMENSION - 2 - i].data[j];
-        for (int j = 0; j < b_list[i].sizeX * b_list[j].sizeX; j++)
+        for (int j = 0; j < b_list[i].sizeX * b_list[i].sizeY; j++)
             b_list[i].data[j] = b_list[i].data[j] - learning_rate * db_gradients[DIMENSION - 2 - i].data[j];
     }
 }
@@ -162,11 +189,31 @@ void neural_network(Matrix *X, Matrix *y, int hidden_layers[], double learning_r
     {
         Matrix *A_list;
         forward_propagation(X, *W_list, *b_list, &A_list);
+//        printf("A_list\n");
+//        for (int j = 0; j < DIMENSION; j++)
+//            printMatrix(A_list[j]);
+//        printf("\n\n");
         Matrix *dW_gradients;
         Matrix *db_gradients;
         back_propagation(y, *W_list, A_list, &dW_gradients, &db_gradients);
+//        printf("dW_gradients\n");
+//        for (int j = 0; j < DIMENSION - 1; j++)
+//            printMatrix(dW_gradients[j]);
+//        printf("\n");
+//        printf("db_gradients\n");
+//        for (int j = 0; j < DIMENSION - 1; j++)
+//            printMatrix(db_gradients[j]);
+//        printf("\n\n");
         update(dW_gradients, db_gradients, *W_list, *b_list, learning_rate);
-        printf("Log loss: %f\n", log_loss(y, &A_list[DIMENSION - 1]));
+//        printf("W_list\n");
+//        for (int j = 0; j < DIMENSION - 1; j++)
+//            printMatrix((*W_list)[j]);
+//        printf("\n");
+//        printf("b_list\n");
+//        for (int j = 0; j < DIMENSION - 1; j++)
+//            printMatrix((*b_list)[j]);
+//        printf("\n\n");
+//        printf("Log loss: %f\n", log_loss(y, &A_list[DIMENSION - 1]));
         for (size_t j = 0; j < DIMENSION - 1; j++)
         {
             free((A_list[j + 1]).data);
@@ -180,15 +227,15 @@ void neural_network(Matrix *X, Matrix *y, int hidden_layers[], double learning_r
     }
 
 
-    for (size_t i = 0; i < DIMENSION - 1; i++)
-    {
-        printf("W_list:\n");
-        printMatrix((*W_list)[i]);
-    }
-    printf("\n\n\n\n\n\n\n\n\n\n");
-    for (size_t i = 0; i < DIMENSION - 1; i++)
-    {
-        printf("b_list:\n");
-        printMatrix((*b_list)[i]);
-    }
+//    for (size_t i = 0; i < DIMENSION - 1; i++)
+//    {
+//        printf("W_list:\n");
+//        printMatrix((*W_list)[i]);
+//    }
+//    printf("\n\n\n\n\n\n\n\n\n\n");
+//    for (size_t i = 0; i < DIMENSION - 1; i++)
+//    {
+//        printf("b_list:\n");
+//        printMatrix((*b_list)[i]);
+//    }
 }
