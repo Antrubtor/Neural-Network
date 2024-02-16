@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra ##-o0 -ggdb
-LDFLAGS = -lm	-fsanitize=address
+LDFLAGS = -lm	##-fsanitize=address
 LDLIBS =
 
 SRC = main.c AI.c matrix.c loadMNIST.c
