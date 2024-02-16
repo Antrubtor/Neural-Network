@@ -182,10 +182,10 @@ double log_loss(Matrix *y, Matrix *A)
     return loss;
 }
 
-void neural_network(Matrix *X, Matrix *y, int hidden_layers[], double learning_rate, int epoch, Matrix **W_list, Matrix **b_list)
+void neural_network(Matrix *X, Matrix *y, int hidden_layers[], double learning_rate, Matrix **W_list, Matrix **b_list)
 {
     init_network(hidden_layers, W_list, b_list);
-    for (int i = 0; i < epoch; i++)
+    for (int i = 0; i < EPOCH; i++)
     {
         Matrix *A_list;
         forward_propagation(X, *W_list, *b_list, &A_list);
