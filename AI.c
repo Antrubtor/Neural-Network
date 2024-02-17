@@ -40,17 +40,14 @@ void forward_propagation(Matrix *X, Matrix *W_list, Matrix *b_list, Matrix **A_l
         A_list[0]->data[i] = X->data[i];
 //    memcpy(A_list[0], X, sizeof(Matrix)); //copy X in the new list, create some bugs
 //    memcpy(A_list[0]->data, X->data, X->sizeX * X->sizeY * sizeof(double));
-    for (int i = 0; i < DIMENSION - 1; i++)
-    {
+    for (int i = 0; i < DIMENSION - 1; i++) {
         Matrix *Z = mul(&W_list[i], &(*A_list)[i]);
         Matrix *tmp_A = &(*A_list)[i + 1];
         tmp_A->sizeX = Z->sizeX;
         tmp_A->sizeY = Z->sizeY;
         tmp_A->data = malloc(Z->sizeX * Z->sizeY * sizeof(double));
-        for (int j = 0; j < Z->sizeY ; j++)
-        {
-            for (int k = 0; k < Z->sizeX; k++)
-            {
+        for (int j = 0; j < Z->sizeY ; j++) {
+            for (int k = 0; k < Z->sizeX; k++) {
                 double tmp = Z->data[j * Z->sizeX + k] + b_list[i].data[j];
                 tmp_A->data[j * Z->sizeX + k] = 1 / (1 + exp(-(tmp)));
             }
@@ -158,8 +155,7 @@ double accuracy(Matrix *X, Matrix *y, Matrix *W_list, Matrix *b_list)
 
     Matrix *tmp_acti = &Acti[DIMENSION - 1];
     double res = 0;
-    for (int i = 0; i < tmp_acti->sizeX; i++)
-    {
+    for (int i = 0; i < tmp_acti->sizeX; i++) {
         double nb = 0;
         if (tmp_acti->data[i] >= 0.5) nb = 1;
         if (nb == y->data[i])
@@ -184,8 +180,7 @@ double log_loss(Matrix *y, Matrix *A)
 void neural_network(Matrix *X, Matrix *y, int hidden_layers[], Matrix **W_list, Matrix **b_list)
 {
     init_network(hidden_layers, W_list, b_list);
-    for (int i = 0; i < EPOCH; i++)
-    {
+    for (int i = 0; i < EPOCH; i++) {
         Matrix *A_list;
         forward_propagation(X, *W_list, *b_list, &A_list);
 //        printf("A_list\n");
@@ -212,11 +207,11 @@ void neural_network(Matrix *X, Matrix *y, int hidden_layers[], Matrix **W_list, 
 //        for (int j = 0; j < DIMENSION - 1; j++)
 //            printMatrix((*b_list)[j]);
 //        printf("\n\n");
-//        printf("Log loss: %f\n", log_loss(y, &A_list[DIMENSION - 1]));
-//        printf("Accuracy: %f\n", accuracy(X, y, *W_list, *b_list));
+        printf("Epoch number %i\n", i);
+        printf("Log loss: %f\n", log_loss(y, &A_list[DIMENSION - 1]));
+        printf("Accuracy: %f\n", accuracy(X, y, *W_list, *b_list));
 
-        for (size_t j = 0; j < DIMENSION - 1; j++)
-        {
+        for (size_t j = 0; j < DIMENSION - 1; j++) {
             free((A_list[j + 1]).data);
             free(dW_gradients[j].data);
             free(db_gradients[j].data);
@@ -226,7 +221,7 @@ void neural_network(Matrix *X, Matrix *y, int hidden_layers[], Matrix **W_list, 
         free(dW_gradients);
         free(db_gradients);
     }
-    printf("Learning ended:\n\n");
+    printf("Learning finished:\n\n");
     Matrix *A_list;
     forward_propagation(X, *W_list, *b_list, &A_list);
     printf("Log loss: %f\n", log_loss(y, &A_list[DIMENSION - 1]));

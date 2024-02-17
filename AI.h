@@ -1,19 +1,19 @@
 #pragma once
 
+//TODO: to edit
+#define EPOCH 1000          // number of training epochs
+#define DIMENSION 5         // depth of neural network, also modify hidden_layers in main.c
+#define LEARNING_RATE 0.1   // neural network learning rate
+#define X_TRAIN_SIZE 1000      // number of different entries
+#define Y_TRAIN_SIZE 784      // how many entries for 1 value (1, 1) for XOR for example
+#define OUTPUT_SIZE 1       // number of output neurons
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
 #include <string.h>
-
-//TODO: to edit
-#define EPOCH 5000          // number of training epochs
-#define DIMENSION 3         // depth of neural network, also modify hidden_layers in main.c
-#define LEARNING_RATE 0.1   // neural network learning rate
-#define X_TRAIN_SIZE 4      // number of different entries
-#define Y_TRAIN_SIZE 2      // how many entries for 1 value (1, 1) for XOR for example
-#define OUTPUT_SIZE 1       // number of output neurons
-
+#include <stdint.h>
 
 typedef struct {
     int sizeX;      // Size in X / Columns
@@ -43,4 +43,4 @@ Matrix* transpose(Matrix *matrix);
 void printMatrix(Matrix mat);
 
 //loadMNIST.c
-void load_minst();
+void load_mnist(char *filename_images, char *filename_labels, Matrix *images, Matrix *labels, int image_number);

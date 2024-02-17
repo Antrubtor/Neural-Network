@@ -2,7 +2,7 @@
 
 int main(int argc, char *argv[])
 {
-    int hidden_layers[] = {Y_TRAIN_SIZE, 4,OUTPUT_SIZE};
+    int hidden_layers[] = {Y_TRAIN_SIZE, 100, 100, 10,OUTPUT_SIZE};
     Matrix *W_list;
     Matrix *b_list;
     Matrix *X;
@@ -71,7 +71,25 @@ int main(int argc, char *argv[])
     }
     else if (argc > 1 && strcmp(argv[1], "MNIST") == 0)
     {
-        printf("MNIST\n");
+        Matrix *images = malloc(sizeof(Matrix));
+        Matrix *labels = malloc(sizeof(Matrix));
+        char *filename_images = "data/train-images-idx3-ubyte";
+        char *filename_labels = "data/train-labels-idx1-ubyte";
+        load_mnist(filename_images, filename_labels, images, labels, 1000);
+        printMatrix(*images);
+        printf("MNIST loaded\n");
+        neural_network(images, labels, hidden_layers, &W_list, &b_list);
+//        printMatrix(*images);
+        free(images->data);
+        free(images);
+        free(labels->data);
+        free(labels);
+
+
+
+//        char *filename_images_train = "t10k-images-idx3-ubyte";
+//        char *filename_labels_train = "t10k-labels-idx1-ubyte";
+
 
     }
     else
@@ -81,16 +99,16 @@ int main(int argc, char *argv[])
     if (argc > 1 && (strcmp(argv[1], "XOR") == 0 || strcmp(argv[1], "MNIST") == 0))
     {
         // Free all
-        for (size_t i = 0; i < DIMENSION - 1; i++)
-        {
+        for (size_t i = 0; i < DIMENSION - 1; i++) {
             free((W_list[i]).data);
             free((b_list[i]).data);
         }
-
-        free(X->data);
-        free(X);
-        free(y->data);
-        free(y);
+        if (strcmp(argv[1], "MNIST") != 0) {
+            free(X->data);
+            free(X);
+            free(y->data);
+            free(y);
+        }
 
         free(W_list);
         free(b_list);
