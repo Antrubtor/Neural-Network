@@ -1,12 +1,12 @@
 #pragma once
 
 //TODO: to edit
-#define EPOCH 1000          // number of training epochs
-#define DIMENSION 5         // depth of neural network, also modify hidden_layers in main.c
-#define LEARNING_RATE 0.1   // neural network learning rate
-#define X_TRAIN_SIZE 1000      // number of different entries
+#define EPOCH 5          // number of training epochs
+#define DIMENSION 4         // depth of neural network, also modify hidden_layers in main.c
+#define LEARNING_RATE 0.005   // neural network learning rate
+#define X_TRAIN_SIZE 1      // number of different entries
 #define Y_TRAIN_SIZE 784      // how many entries for 1 value (1, 1) for XOR for example
-#define OUTPUT_SIZE 1       // number of output neurons
+#define OUTPUT_SIZE 10       // number of output neurons
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,6 +14,9 @@
 #include <math.h>
 #include <string.h>
 #include <stdint.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+
 
 typedef struct {
     int sizeX;      // Size in X / Columns
@@ -29,7 +32,8 @@ void back_propagation(Matrix *y, Matrix *W_list, Matrix *A_list, Matrix **dW_lis
 void update(Matrix *dW_gradients, Matrix *db_gradients, Matrix *W_list, Matrix *b_list);
 double predict(Matrix *X, Matrix *W_list, Matrix *b_list);
 double log_loss(Matrix *y, Matrix *A);
-void neural_network(Matrix *X, Matrix *y, int hidden_layers[], Matrix **W_list, Matrix **b_list);
+void neural_network(Matrix **X, Matrix **y, int hidden_layers[], Matrix **W_list, Matrix **b_list);
+void predict_test(Matrix *X, Matrix *W_list, Matrix *b_list);
 
 // matrix.c
 Matrix* add(Matrix *matrix1, Matrix *matrix2);
@@ -43,4 +47,8 @@ Matrix* transpose(Matrix *matrix);
 void printMatrix(Matrix mat);
 
 //loadMNIST.c
+#define IMAGE_SIZE_X 28
+#define IMAGE_SIZE_Y 28
+#define IMAGE_SIZE_FULL 784
 void load_mnist(char *filename_images, char *filename_labels, Matrix *images, Matrix *labels, int image_number);
+void matrixToImage(Matrix *mat, const char *filename);

@@ -1,7 +1,7 @@
 CC = gcc
-CFLAGS = -Wall -Wextra ##-o0 -ggdb
+CFLAGS = -Wall -Wextra -lm `pkg-config --cflags sdl2 SDL2_image` ##-o0 -ggdb
 LDFLAGS = -lm -fsanitize=address
-LDLIBS =
+LDLIBS = `pkg-config --libs sdl2 SDL2_image`
 
 SRC = main.c AI.c matrix.c loadMNIST.c
 OBJ = $(SRC:.c=.o)

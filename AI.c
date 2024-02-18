@@ -28,16 +28,40 @@ void init_network(int dim[], Matrix **W_list, Matrix **b_list)
         for (int j = 0; j < tmp_b->sizeY; j++)
             tmp_b->data[j] = random_gaussian();
     }
+//    (&(*W_list)[0])->data[0] = 0.11;
+//    (&(*W_list)[0])->data[1] = 0.21;
+//    (&(*W_list)[0])->data[2] = 0.31;
+//    (&(*W_list)[0])->data[3] = 0.41;
+//    (&(*W_list)[0])->data[4] = 0.51;
+//    (&(*W_list)[0])->data[5] = 0.61;
+//    (&(*W_list)[0])->data[6] = 0.71;
+//    (&(*W_list)[0])->data[7] = 0.81;
+//
+//    (&(*W_list)[1])->data[0] = 0.82;
+//    (&(*W_list)[1])->data[1] = 0.72;
+//    (&(*W_list)[1])->data[2] = 0.62;
+//    (&(*W_list)[1])->data[3] = 0.52;
+//
+//
+//    (&(*b_list)[0])->data[0] = -0.13;
+//    (&(*b_list)[0])->data[1] = -0.23;
+//    (&(*b_list)[0])->data[2] = -0.33;
+//    (&(*b_list)[0])->data[3] = -0.43;
+//
+//    (&(*b_list)[1])->data[0] = 0.14;
 }
 
 void forward_propagation(Matrix *X, Matrix *W_list, Matrix *b_list, Matrix **A_list)
 {
+//    printf("X: \n");
+//    printMatrix(*X);
     *A_list = malloc(DIMENSION * sizeof(Matrix));
     A_list[0]->sizeX = X->sizeX;
     A_list[0]->sizeY = X->sizeY;
     A_list[0]->data = malloc(X->sizeX * X->sizeY * sizeof(double));
     for (int i = 0; i < X->sizeX * X->sizeY; i++)
         A_list[0]->data[i] = X->data[i];
+
 //    memcpy(A_list[0], X, sizeof(Matrix)); //copy X in the new list, create some bugs
 //    memcpy(A_list[0]->data, X->data, X->sizeX * X->sizeY * sizeof(double));
     for (int i = 0; i < DIMENSION - 1; i++) {
@@ -46,6 +70,11 @@ void forward_propagation(Matrix *X, Matrix *W_list, Matrix *b_list, Matrix **A_l
         tmp_A->sizeX = Z->sizeX;
         tmp_A->sizeY = Z->sizeY;
         tmp_A->data = malloc(Z->sizeX * Z->sizeY * sizeof(double));
+//        printf("LAAAA:---------------\n");
+//        printMatrix((*A_list)[i]);
+//        printMatrix(W_list[i]);
+//        printMatrix(*Z);
+//        printf("---------------\n");
         for (int j = 0; j < Z->sizeY ; j++) {
             for (int k = 0; k < Z->sizeX; k++) {
                 double tmp = Z->data[j * Z->sizeX + k] + b_list[i].data[j];
@@ -72,7 +101,7 @@ void back_propagation(Matrix *y, Matrix *W_list, Matrix *A_list, Matrix **dW_gra
         tmp_dW->sizeY = tmp_mul_dW->sizeY;
         tmp_dW->data = malloc(tmp_mul_dW->sizeX * tmp_mul_dW->sizeY * sizeof(double));
         for (int j = 0; j < tmp_mul_dW->sizeX * tmp_mul_dW->sizeY; j++)
-            tmp_dW->data[j] = tmp_mul_dW->data[j] / X_TRAIN_SIZE;
+            tmp_dW->data[j] = tmp_mul_dW->data[j];// / X_TRAIN_SIZE;
 
         Matrix *tmp_db = &(*db_gradients)[DIMENSION - 2 - i];
         Matrix *tmp_sum_db = columns_sum(dZ);
@@ -80,13 +109,12 @@ void back_propagation(Matrix *y, Matrix *W_list, Matrix *A_list, Matrix **dW_gra
         tmp_db->sizeY = tmp_sum_db->sizeY;
         tmp_db->data = malloc(tmp_sum_db->sizeX * tmp_sum_db->sizeY * sizeof(double));
         for (int j = 0; j < tmp_sum_db->sizeX * tmp_sum_db->sizeY; j++)
-            tmp_db->data[j] = tmp_sum_db->data[j] / X_TRAIN_SIZE;
+            tmp_db->data[j] = tmp_sum_db->data[j];// / X_TRAIN_SIZE;
         if (i > 0)
         {
             Matrix *tmp_t_dZ = transpose(&W_list[i]);
             Matrix *tmp_mul_dZ = mul(tmp_t_dZ, dZ);
             Matrix *tmp_1_dZ = mul_matrix(tmp_mul_dZ, &A_list[i]);
-
             Matrix *min_dZ = malloc(sizeof(Matrix));
             min_dZ->sizeX = A_list[i].sizeX;
             min_dZ->sizeY = A_list[i].sizeY;
@@ -148,6 +176,18 @@ double predict(Matrix *X, Matrix *W_list, Matrix *b_list)
     return pre;
 }
 
+void predict_test(Matrix *X, Matrix *W_list, Matrix *b_list)
+{
+    Matrix *Acti;
+    forward_propagation(X, W_list, b_list, &Acti);
+    printf("Prediction:\n");
+    for (int i = 0; i < OUTPUT_SIZE; i++)
+        printf("%i: %f", i, Acti[DIMENSION - 1].data[i]);
+    for (int i = 0; i < DIMENSION; i++)
+        free(Acti[i].data);
+    free(Acti);
+}
+
 double accuracy(Matrix *X, Matrix *y, Matrix *W_list, Matrix *b_list)
 {
     Matrix *Acti;
@@ -177,19 +217,23 @@ double log_loss(Matrix *y, Matrix *A)
     return loss;
 }
 
-void neural_network(Matrix *X, Matrix *y, int hidden_layers[], Matrix **W_list, Matrix **b_list)
+void neural_network(Matrix **X, Matrix **y, int hidden_layers[], Matrix **W_list, Matrix **b_list)
 {
+//    printMatrix(*X);
+//    printMatrix(*y);
     init_network(hidden_layers, W_list, b_list);
     for (int i = 0; i < EPOCH; i++) {
-        Matrix *A_list;
-        forward_propagation(X, *W_list, *b_list, &A_list);
-//        printf("A_list\n");
-//        for (int j = 0; j < DIMENSION; j++)
-//            printMatrix(A_list[j]);
-//        printf("\n\n");
-        Matrix *dW_gradients;
-        Matrix *db_gradients;
-        back_propagation(y, *W_list, A_list, &dW_gradients, &db_gradients);
+        for (int j = 0; j < X_TRAIN_SIZE; j++)
+        {
+            Matrix *A_list;
+            forward_propagation(&(*X)[j], *W_list, *b_list, &A_list);
+//            printf("A_list\n");
+//            for (int k = 0; k < DIMENSION; k++)
+//                printMatrix(A_list[k]);
+//            printf("\n\n");
+            Matrix *dW_gradients;
+            Matrix *db_gradients;
+            back_propagation(&(*y)[j], *W_list, A_list, &dW_gradients, &db_gradients);
 //        printf("dW_gradients\n");
 //        for (int j = 0; j < DIMENSION - 1; j++)
 //            printMatrix(dW_gradients[j]);
@@ -198,7 +242,7 @@ void neural_network(Matrix *X, Matrix *y, int hidden_layers[], Matrix **W_list, 
 //        for (int j = 0; j < DIMENSION - 1; j++)
 //            printMatrix(db_gradients[j]);
 //        printf("\n\n");
-        update(dW_gradients, db_gradients, *W_list, *b_list);
+            update(dW_gradients, db_gradients, *W_list, *b_list);
 //        printf("W_list\n");
 //        for (int j = 0; j < DIMENSION - 1; j++)
 //            printMatrix((*W_list)[j]);
@@ -207,25 +251,27 @@ void neural_network(Matrix *X, Matrix *y, int hidden_layers[], Matrix **W_list, 
 //        for (int j = 0; j < DIMENSION - 1; j++)
 //            printMatrix((*b_list)[j]);
 //        printf("\n\n");
-        printf("Epoch number %i\n", i);
-        printf("Log loss: %f\n", log_loss(y, &A_list[DIMENSION - 1]));
-        printf("Accuracy: %f\n", accuracy(X, y, *W_list, *b_list));
+//            printf("Epoch number %i\n", i);
+//            printf("Log loss: %f\n", log_loss(y[j], &A_list[DIMENSION - 1]));
+//            printf("Accuracy: %f\n", accuracy(X[j], y[j], *W_list, *b_list));
 
-        for (size_t j = 0; j < DIMENSION - 1; j++) {
-            free((A_list[j + 1]).data);
-            free(dW_gradients[j].data);
-            free(db_gradients[j].data);
+            for (size_t k = 0; k < DIMENSION - 1; k++) {
+                free((A_list[k + 1]).data);
+                free(dW_gradients[k].data);
+                free(db_gradients[k].data);
+            }
+            free(A_list[0].data);
+            free(A_list);
+            free(dW_gradients);
+            free(db_gradients);
         }
-        free(A_list[0].data);
-        free(A_list);
-        free(dW_gradients);
-        free(db_gradients);
+        printf("Epoch number: %i\n", i);
     }
     printf("Learning finished:\n\n");
-    Matrix *A_list;
-    forward_propagation(X, *W_list, *b_list, &A_list);
-    printf("Log loss: %f\n", log_loss(y, &A_list[DIMENSION - 1]));
-    printf("Accuracy: %.2f%%\n", accuracy(X, y, *W_list, *b_list) * 100);
+//    Matrix *A_list;
+//    forward_propagation(X, *W_list, *b_list, &A_list);
+//    printf("Log loss: %f\n", log_loss(y, &A_list[DIMENSION - 1]));
+//    printf("Accuracy: %.2f%%\n", accuracy(X, y, *W_list, *b_list) * 100);
 
 
 //    for (size_t i = 0; i < DIMENSION - 1; i++)
