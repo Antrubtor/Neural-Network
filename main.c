@@ -2,7 +2,7 @@
 
 int main(int argc, char *argv[])
 {
-    int hidden_layers[] = {Y_TRAIN_SIZE, 256, 256, OUTPUT_SIZE};
+    int hidden_layers[] = {Y_TRAIN_SIZE, 32, 32, OUTPUT_SIZE};
     Matrix *W_list;
     Matrix *b_list;
 //    Matrix *X;
@@ -92,16 +92,37 @@ int main(int argc, char *argv[])
 //
         printf("MNIST loaded\n");
         neural_network(&X, &y, hidden_layers, &W_list, &b_list);
-        Matrix *pre = malloc(sizeof(Matrix));
-        Matrix *res = malloc(sizeof(Matrix));
-        char *filename_images_train = "t10k-images-idx3-ubyte";
-        char *filename_labels_train = "t10k-labels-idx1-ubyte";
-        load_mnist(filename_images_train, filename_labels_train, pre, res, 1);
-        printf("ui\n");
-        predict_test(pre, W_list, b_list);
-        printMatrix(*res);
+        Matrix *pre = malloc(10000 * sizeof(Matrix));
+        Matrix *res = malloc(10000 * sizeof(Matrix));
+        char *filename_images_train = "data/t10k-images-idx3-ubyte";
+        char *filename_labels_train = "data/t10k-labels-idx1-ubyte";
+        int nbr_image_test = 10000;
+        load_mnist(filename_images_train, filename_labels_train, pre, res, nbr_image_test);
+        double accuracy = 0;
+        for (int i = 0; i < nbr_image_test; i++)
+        {
+            int max = 0;
+            double max_nbr = 0;
+            for (int j = 0; j < 10; j++)
+            {
+                if (res[i].data[j] > max_nbr)
+                {
+                    max = j;
+                    max_nbr = res[i].data[j];
+                }
+            }
 
+            accuracy += predict_test(&pre[i], max, W_list, b_list);
+        }
+        printf("Accuracy: %f\n", accuracy / nbr_image_test);
 
+        for (int i = 0; i < nbr_image_test; i++)
+        {
+            free(pre[i].data);
+            free(res[i].data);
+        }
+        free(pre);
+        free(res);
 
 
     }

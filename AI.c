@@ -176,16 +176,27 @@ double predict(Matrix *X, Matrix *W_list, Matrix *b_list)
     return pre;
 }
 
-void predict_test(Matrix *X, Matrix *W_list, Matrix *b_list)
+int predict_test(Matrix *X, double res, Matrix *W_list, Matrix *b_list)
 {
     Matrix *Acti;
     forward_propagation(X, W_list, b_list, &Acti);
-    printf("Prediction:\n");
-    for (int i = 0; i < OUTPUT_SIZE; i++)
-        printf("%i: %f", i, Acti[DIMENSION - 1].data[i]);
+//    printf("Prediction:\n");
+    int max = 0;
+    double max_nbr = Acti[DIMENSION - 1].data[0];
+    for (int i = 0; i < OUTPUT_SIZE; i++) {
+        if (Acti[DIMENSION - 1].data[i] > max_nbr) {
+            max_nbr = Acti[DIMENSION - 1].data[i];
+            max = i;
+        }
+//        printf("%i: %f", i, Acti[DIMENSION - 1].data[i]);
+    }
+//    printf("\n");
     for (int i = 0; i < DIMENSION; i++)
         free(Acti[i].data);
     free(Acti);
+//    printf("Max: %i / res = %f\n", max, res);
+    if (max == res) return 1;
+    return 0;
 }
 
 double accuracy(Matrix *X, Matrix *y, Matrix *W_list, Matrix *b_list)
