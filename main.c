@@ -2,18 +2,19 @@
 
 int main(int argc, char *argv[])
 {
-    int hidden_layers[] = {Y_TRAIN_SIZE, 100, 100, 10,OUTPUT_SIZE};
+    int hidden_layers[] = {Y_TRAIN_SIZE, 32, 32, OUTPUT_SIZE};  //example for XOR and MNIST
     Matrix *W_list;
     Matrix *b_list;
-    Matrix *X;
-    Matrix *y;
+    Matrix *X = malloc(X_TRAIN_SIZE * sizeof(Matrix));
+    Matrix *y = malloc(X_TRAIN_SIZE * sizeof(Matrix));
+
+    char network_file[] = "train/trained_network";
 
     srand(time(NULL));
 
-
-    if (argc > 1 && strcmp(argv[1], "XOR") == 0)
+    if (argc > 1 && (strcmp(argv[1], "XOR") == 0 || strcmp(argv[1], "UXOR") == 0))
     {
-        printf("XOR\n");
+        printf("Learning and saving the network for XOR data\n");
         double Xx[X_TRAIN_SIZE][Y_TRAIN_SIZE] = {
                 {1, 1},
                 {0, 1},
@@ -29,86 +30,147 @@ int main(int argc, char *argv[])
 
 
         // transform tabs to Matrix
-        X = malloc(sizeof(Matrix));
-        X->sizeX = X_TRAIN_SIZE;
-        X->sizeY = Y_TRAIN_SIZE;
-        X->data = malloc(X_TRAIN_SIZE * Y_TRAIN_SIZE * sizeof(double));
-        for (int i = 0; i < Y_TRAIN_SIZE; i++) {
-            for (int j = 0; j < X_TRAIN_SIZE; j++) {
-                X->data[i * X_TRAIN_SIZE + j] = Xx[j][i];
+
+        for (int i = 0; i < X_TRAIN_SIZE; i ++) {
+            X[i].sizeX = 1;
+            X[i].sizeY = Y_TRAIN_SIZE;
+            X[i].data = malloc(Y_TRAIN_SIZE * sizeof(double));
+            for (int j = 0; j < Y_TRAIN_SIZE; j++) {
+                X[i].data[j] = Xx[i][j];
             }
+            y[i].sizeX = 1;
+            y[i].sizeY = 1;
+            y[i].data = malloc(sizeof(double));
+            y[i].data[0] = yy[i];
         }
-        y = malloc(sizeof(Matrix));
-        y->sizeX = X_TRAIN_SIZE;
-        y->sizeY = 1;
-        y->data = malloc(X_TRAIN_SIZE * sizeof(double));
-        for (size_t i = 0; i < X_TRAIN_SIZE; i++) {
-            y->data[i] = yy[i];
+        int update_net = 0;
+        int epoch_nbr = EPOCH;
+        if (strcmp(argv[1], "UXOR") == 0) {
+            epoch_nbr += load_network(&W_list, &b_list, network_file);
+            update_net = 1;
         }
+        neural_network(&X, &y, hidden_layers, &W_list, &b_list, update_net);
+        save_network(W_list, b_list, network_file, epoch_nbr);
+    }
+    else if (argc > 1 && (strcmp(argv[1], "MNIST") == 0 || strcmp(argv[1], "UMNIST") == 0))
+    {
+        printf("Learning and saving the network for MNIST data\n");
+        char *filename_images = "data/train-images-idx3-ubyte";
+        char *filename_labels = "data/train-labels-idx1-ubyte";
+        load_mnist(filename_images, filename_labels, X, y, X_TRAIN_SIZE);
+
+        int update_net = 0;
+        int epoch_nbr = EPOCH;
+        if (strcmp(argv[1], "UMNIST") == 0) {
+            epoch_nbr += load_network(&W_list, &b_list, network_file);
+            update_net = 1;
+        }
+        neural_network(&X, &y, hidden_layers, &W_list, &b_list, update_net);
+        save_network(W_list, b_list, network_file, epoch_nbr);
+    }
 
 
-        neural_network(X, y, hidden_layers, &W_list, &b_list);
+    if ((argc > 1 && strcmp(argv[1], "TXOR") == 0) || (argc > 2 && strcmp(argv[2], "TXOR") == 0))
+    {
+        if (argc == 2) {
+            printf("Loading and testing the network for XOR data\n");
+            load_network(&W_list, &b_list, network_file);
+        }
+        else
+            printf("Testing the network that has just been trained on the XOR data\n");
 
         printf("\nPredictions:\n");
         Matrix *pre = malloc(sizeof(Matrix));
         pre->sizeX = 1;
         pre->sizeY = 2;
         pre->data = malloc(2 * sizeof(double));
-        pre->data[0] = 1;
-        pre->data[1] = 1;
-        printf("Predict for (1, 1): %f\n", predict(pre, W_list, b_list));
-        pre->data[0] = 0;
-        pre->data[1] = 1;
-        printf("Predict for (0, 1): %f\n", predict(pre, W_list, b_list));
-        pre->data[0] = 1;
-        pre->data[1] = 0;
-        printf("Predict for (1, 0): %f\n", predict(pre, W_list, b_list));
-        pre->data[0] = 0;
-        pre->data[1] = 0;
-        printf("Predict for (0, 0): %f\n", predict(pre, W_list, b_list));
+
+        pre->data[0] = 1; pre->data[1] = 1;
+        Matrix *res = predict(pre, W_list, b_list, 1);
+        free(res->data);
+        free(res);
+        pre->data[0] = 0; pre->data[1] = 1;
+        res = predict(pre, W_list, b_list, 1);
+        free(res->data);
+        free(res);
+        pre->data[0] = 1; pre->data[1] = 0;
+        res = predict(pre, W_list, b_list, 1);
+        free(res->data);
+        free(res);
+        pre->data[0] = 0; pre->data[1] = 0;
+        res = predict(pre, W_list, b_list, 1);
+        free(res->data);
+        free(res);
         free(pre->data);
         free(pre);
     }
-    else if (argc > 1 && strcmp(argv[1], "MNIST") == 0)
+    if ((argc > 1 && strcmp(argv[1], "TMNIST") == 0) || (argc > 2 && strcmp(argv[2], "TMNIST") == 0))
     {
-        Matrix *images = malloc(sizeof(Matrix));
-        Matrix *labels = malloc(sizeof(Matrix));
-        char *filename_images = "data/train-images-idx3-ubyte";
-        char *filename_labels = "data/train-labels-idx1-ubyte";
-        load_mnist(filename_images, filename_labels, images, labels, 1000);
-        printMatrix(*images);
-        printf("MNIST loaded\n");
-        neural_network(images, labels, hidden_layers, &W_list, &b_list);
-//        printMatrix(*images);
-        free(images->data);
-        free(images);
-        free(labels->data);
-        free(labels);
+        if (argc == 2) {
+            printf("Loading and testing the network for MNIST data\n");
+            load_network(&W_list, &b_list, network_file);
+        }
+        else
+            printf("Testing the network that has just been trained on the MNIST data\n");
+
+        int nbr_image_test = 10000;
+        Matrix *pre = malloc(nbr_image_test * sizeof(Matrix));
+        Matrix *res = malloc(nbr_image_test * sizeof(Matrix));
+        char *filename_images_train = "data/t10k-images-idx3-ubyte";
+        char *filename_labels_train = "data/t10k-labels-idx1-ubyte";
+        load_mnist(filename_images_train, filename_labels_train, pre, res, nbr_image_test);
+        double accuracy = 0;
+        for (int i = 0; i < nbr_image_test; i++) {
+            int add = 1;
+            Matrix *prediction = predict(&pre[i], W_list, b_list, 0);
+            for (int j = 0; j < OUTPUT_SIZE; j++) {
+                if (fabs(prediction->data[j] - res[i].data[j]) > 0.01) {    //because malloc not really equal to 0
+                    add = 0;
+                    break;
+                }
+            }
+            accuracy += add;
+            free(prediction->data);
+            free(prediction);
+        }
+        printf("Accuracy: %f%%\n", (accuracy / nbr_image_test) * 100);
+
+        for (int i = 0; i < nbr_image_test; i++) {
+            free(pre[i].data);
+            free(res[i].data);
+        }
+        free(pre);
+        free(res);
 
 
-
-//        char *filename_images_train = "t10k-images-idx3-ubyte";
-//        char *filename_labels_train = "t10k-labels-idx1-ubyte";
-
-
+//        Matrix *IMG = image_to_matrix("img/on.bmp");
+//        predict(&(*IMG), W_list, b_list, 1);
+//        free(IMG->data);
+//        free(IMG);
     }
-    else
-        printf("Please choose between XOR and MNIST\n");
 
 
-    if (argc > 1 && (strcmp(argv[1], "XOR") == 0 || strcmp(argv[1], "MNIST") == 0))
+
+    if ((argc > 1 && (strcmp(argv[1], "XOR") == 0 || strcmp(argv[1], "MNIST") == 0 ||
+                    strcmp(argv[1], "UXOR") == 0 || strcmp(argv[1], "UMNIST") == 0 ||
+                    strcmp(argv[1], "TXOR") == 0 || strcmp(argv[1], "TMNIST") == 0)) ||
+                    (argc > 2 && (strcmp(argv[2], "TXOR") == 0 || strcmp(argv[2], "TMNIST") == 0)))
     {
         // Free all
         for (size_t i = 0; i < DIMENSION - 1; i++) {
             free((W_list[i]).data);
             free((b_list[i]).data);
         }
-        if (strcmp(argv[1], "MNIST") != 0) {
-            free(X->data);
-            free(X);
-            free(y->data);
-            free(y);
+
+        if (strcmp(argv[1], "XOR") == 0 || strcmp(argv[1], "MNIST") == 0 ||
+                strcmp(argv[1], "UXOR") == 0 || strcmp(argv[1], "UMNIST") == 0) {
+            for (int i = 0; i < X_TRAIN_SIZE; i++) {
+                free(X[i].data);
+                free(y[i].data);
+            }
         }
+        free(X);
+        free(y);
 
         free(W_list);
         free(b_list);
