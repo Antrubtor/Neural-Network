@@ -1,6 +1,5 @@
 #include "AI.h"
-//#include <SDL2/SDL.h>
-#include <unistd.h>
+
 void load_mnist(char *filename_images, char *filename_labels, Matrix *images, Matrix *labels, int image_number)
 {
     FILE *file_images = fopen(filename_images, "rb");
@@ -14,7 +13,6 @@ void load_mnist(char *filename_images, char *filename_labels, Matrix *images, Ma
             fread(&nbr, sizeof(nbr), 1, file_images);
             if (nbr > 128) nbr = 1;     //to binarize
             else nbr = 0;
-//            images->data[i * IMAGE_SIZE_FULL + j] = nbr;
             images[i].data[j] = nbr;
         }
     }
@@ -28,77 +26,38 @@ void load_mnist(char *filename_images, char *filename_labels, Matrix *images, Ma
         uint8_t nbr;
         fread(&nbr, sizeof(nbr), 1, file_labels);
         labels[i].data[nbr] = 1;
-//        printf("nbr: %u\n", nbr);
     }
+    printf("MNIST loaded\n");
 }
 
 
+Matrix* image_to_matrix(char filename[])
+{
 
+//    SDL_Surface *image = IMG_Load(filename);
+    SDL_Surface *image = SDL_LoadBMP(filename);
+    SDL_Surface *resized = SDL_CreateRGBSurface(0, 28, 28, image->format->BitsPerPixel,
+                                                image->format->Rmask, image->format->Gmask,
+                                                image->format->Bmask, image->format->Amask);
+    SDL_BlitScaled(image, NULL, resized, NULL);
+    SDL_LockSurface(resized);
 
-void matrixToImage(Matrix *mat, const char *filename) {
-    SDL_Init(SDL_INIT_VIDEO);
-
-    SDL_Window *window = SDL_CreateWindow("Matrix Image",
-                                          SDL_WINDOWPOS_UNDEFINED,
-                                          SDL_WINDOWPOS_UNDEFINED,
-                                          mat->sizeX, mat->sizeY,
-                                          SDL_WINDOW_SHOWN);
-    if (window == NULL) {
-        printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
-        return;
+    Uint32* pixels = resized->pixels;
+    Matrix *res = malloc(sizeof(Matrix));
+    res->sizeX = 28;
+    res->sizeY = 28;
+    res->data = malloc(784 * sizeof(double));
+    Uint8 r, g, b;
+    for (int i = 0; i < 784; i++) {
+        Uint32 pixel = pixels[i];
+        SDL_GetRGB(pixel, resized->format, &r, &g, &b);
+        printf("r: %u / g: %u / b: %u\n", r, g, b);
+        if ((r + g + b) / 3 > 128) res->data[i] = 1;
+        else res->data[i] = 0;
     }
-
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    if (renderer == NULL) {
-        printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return;
-    }
-
-    SDL_Texture *texture = SDL_CreateTexture(renderer,
-                                             SDL_PIXELFORMAT_RGBA8888,
-                                             SDL_TEXTUREACCESS_TARGET,
-                                             mat->sizeX, mat->sizeY);
-    if (texture == NULL) {
-        printf("Texture could not be created! SDL_Error: %s\n", SDL_GetError());
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
-        return;
-    }
-
-    SDL_SetRenderTarget(renderer, texture);
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderClear(renderer);
-
-    for (int y = 0; y < mat->sizeY; y++) {
-        for (int x = 0; x < mat->sizeX; x++) {
-            double value = mat->data[y * mat->sizeX + x];
-            if (value > 0.6) {
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-            } else {
-                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-            }
-            SDL_RenderDrawPoint(renderer, x, y);
-        }
-    }
-
-    SDL_SetRenderTarget(renderer, NULL);
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
-    SDL_RenderPresent(renderer);
-
-    SDL_Surface *surface = SDL_CreateRGBSurface(0, mat->sizeX, mat->sizeY, 32,
-                                                0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
-    if (surface == NULL) {
-        printf("Surface could not be created! SDL_Error: %s\n", SDL_GetError());
-    } else {
-        SDL_RenderReadPixels(renderer, NULL, surface->format->format, surface->pixels, surface->pitch);
-        SDL_SaveBMP(surface, filename);
-        SDL_FreeSurface(surface);
-    }
-    SDL_DestroyTexture(texture);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+    SDL_UnlockSurface(resized);
+    IMG_SavePNG(resized, "test.png");
+    SDL_FreeSurface(image);
+    SDL_FreeSurface(resized);
+    return res;
 }
