@@ -104,7 +104,8 @@ int main(int argc, char *argv[])
         free(pre->data);
         free(pre);
     }
-    if ((argc > 1 && strcmp(argv[1], "TMNIST") == 0) || (argc > 2 && strcmp(argv[2], "TMNIST") == 0))
+    if ((argc > 1 && strcmp(argv[1], "TMNIST1") == 0) || (argc > 2 && strcmp(argv[2], "TMNIST1") == 0) ||
+            (argc > 1 && strcmp(argv[1], "TMNIST2") == 0) || (argc > 2 && strcmp(argv[2], "TMNIST2") == 0))
     {
         if (argc == 2) {
             printf("Loading and testing the network for MNIST data\n");
@@ -113,48 +114,64 @@ int main(int argc, char *argv[])
         else
             printf("Testing the network that has just been trained on the MNIST data\n");
 
-        int nbr_image_test = 10000;
-        Matrix *pre = malloc(nbr_image_test * sizeof(Matrix));
-        Matrix *res = malloc(nbr_image_test * sizeof(Matrix));
-        char *filename_images_train = "data/t10k-images-idx3-ubyte";
-        char *filename_labels_train = "data/t10k-labels-idx1-ubyte";
-        load_mnist(filename_images_train, filename_labels_train, pre, res, nbr_image_test);
-        double accuracy = 0;
-        for (int i = 0; i < nbr_image_test; i++) {
-            int add = 1;
-            Matrix *prediction = predict(&pre[i], W_list, b_list, 0);
-            for (int j = 0; j < OUTPUT_SIZE; j++) {
-                if (fabs(prediction->data[j] - res[i].data[j]) > 0.01) {    //because malloc not really equal to 0
-                    add = 0;
+        if (strcmp(argv[1], "TMNIST1") == 0 || (argc > 2 && strcmp(argv[2], "TMNIST1") == 0))
+        {
+            int nbr_image_test = 10000;
+            Matrix *pre = malloc(nbr_image_test * sizeof(Matrix));
+            Matrix *res = malloc(nbr_image_test * sizeof(Matrix));
+            char *filename_images_train = "data/t10k-images-idx3-ubyte";
+            char *filename_labels_train = "data/t10k-labels-idx1-ubyte";
+            load_mnist(filename_images_train, filename_labels_train, pre, res, nbr_image_test);
+            double accuracy = 0;
+            for (int i = 0; i < nbr_image_test; i++) {
+                int add = 1;
+                Matrix *prediction = predict(&pre[i], W_list, b_list, 0);
+                for (int j = 0; j < OUTPUT_SIZE; j++) {
+                    if (fabs(prediction->data[j] - res[i].data[j]) > 0.01) {    //because malloc not really equal to 0
+                        add = 0;
+                        break;
+                    }
+                }
+                accuracy += add;
+                free(prediction->data);
+                free(prediction);
+            }
+            printf("Accuracy: %.2f%% on MNIST test data\n", (accuracy / nbr_image_test) * 100);
+
+            for (int i = 0; i < nbr_image_test; i++) {
+                free(pre[i].data);
+                free(res[i].data);
+            }
+            free(pre);
+            free(res);
+        }
+        else if (strcmp(argv[1], "TMNIST2") == 0 || (argc > 2 && strcmp(argv[2], "TMNIST2") == 0))
+        {
+            printf("Predictions:\n");
+            Matrix *IMG = image_to_matrix("img/test_img.png");
+            Matrix *pre = predict(&IMG[0], W_list, b_list, 0);
+            int check = 0;
+            for (int i = 0; i < pre->sizeX * pre->sizeY; i++) {
+                if (pre->data[i] == 1) {
+                    printf("It's a %i !\n", i);
+                    check = 1;
                     break;
                 }
             }
-            accuracy += add;
-            free(prediction->data);
-            free(prediction);
+            if (check == 0) printf("Unrecognized\n");
+            free(IMG->data);
+            free(IMG);
+            free(pre->data);
+            free(pre);
         }
-        printf("Accuracy: %f%%\n", (accuracy / nbr_image_test) * 100);
-
-        for (int i = 0; i < nbr_image_test; i++) {
-            free(pre[i].data);
-            free(res[i].data);
-        }
-        free(pre);
-        free(res);
-
-
-//        Matrix *IMG = image_to_matrix("img/on.bmp");
-//        predict(&(*IMG), W_list, b_list, 1);
-//        free(IMG->data);
-//        free(IMG);
     }
 
 
 
     if ((argc > 1 && (strcmp(argv[1], "XOR") == 0 || strcmp(argv[1], "MNIST") == 0 ||
                     strcmp(argv[1], "UXOR") == 0 || strcmp(argv[1], "UMNIST") == 0 ||
-                    strcmp(argv[1], "TXOR") == 0 || strcmp(argv[1], "TMNIST") == 0)) ||
-                    (argc > 2 && (strcmp(argv[2], "TXOR") == 0 || strcmp(argv[2], "TMNIST") == 0)))
+                    strcmp(argv[1], "TXOR") == 0 || strcmp(argv[1], "TMNIST1") == 0 || strcmp(argv[1], "TMNIST2") == 0)) ||
+                    (argc > 2 && (strcmp(argv[2], "TXOR") == 0 || strcmp(argv[2], "TMNIST1") == 0 || strcmp(argv[2], "TMNIST2") == 0)))
     {
         // Free all
         for (size_t i = 0; i < DIMENSION - 1; i++) {

@@ -2,12 +2,21 @@
 
 //TODO: to edit
 
-#define EPOCH 1          // number of training epochs
+#define EPOCH 10          // number of training epochs
 #define DIMENSION 4         // depth of neural network, also modify hidden_layers in main.c
 #define LEARNING_RATE 0.005   // neural network learning rate
 #define X_TRAIN_SIZE 60000      // number of different entries
 #define Y_TRAIN_SIZE 784      // how many entries for 1 value (1, 1) for XOR for example
 #define OUTPUT_SIZE 10       // number of output neurons
+
+/* Example for XOR
+#define EPOCH 5000
+#define DIMENSION 4
+#define LEARNING_RATE 0.1
+#define X_TRAIN_SIZE 4
+#define Y_TRAIN_SIZE 2
+#define OUTPUT_SIZE 1
+*/
 
 /* Example for MNIST
 #define EPOCH 32

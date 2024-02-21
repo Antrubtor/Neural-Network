@@ -290,7 +290,6 @@ void save_network(Matrix *W_list, Matrix *b_list, char filename[], int epoch_nbr
     }
 
     fwrite(&W_list, sizeof(epoch_nbr), 1, file);
-
     fclose(file);
     printf("Network saved\n");
 }
@@ -353,8 +352,6 @@ int load_network(Matrix **W_list, Matrix **b_list, char filename[])
     }
 
     fclose(file);
-
     printf("\nThe network has been loaded successfully.\n");
-
     return epoch_nbr;
 }

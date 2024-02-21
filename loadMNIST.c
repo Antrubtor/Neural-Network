@@ -33,31 +33,27 @@ void load_mnist(char *filename_images, char *filename_labels, Matrix *images, Ma
 
 Matrix* image_to_matrix(char filename[])
 {
+    SDL_Surface* nbr_image = IMG_Load(filename);
+    SDL_Surface* nbr_image_resized = SDL_CreateRGBSurface(0, 28, 28, 32, 0, 0, 0, 0);
+    SDL_BlitScaled(nbr_image, NULL, nbr_image_resized, NULL);
 
-//    SDL_Surface *image = IMG_Load(filename);
-    SDL_Surface *image = SDL_LoadBMP(filename);
-    SDL_Surface *resized = SDL_CreateRGBSurface(0, 28, 28, image->format->BitsPerPixel,
-                                                image->format->Rmask, image->format->Gmask,
-                                                image->format->Bmask, image->format->Amask);
-    SDL_BlitScaled(image, NULL, resized, NULL);
-    SDL_LockSurface(resized);
 
-    Uint32* pixels = resized->pixels;
     Matrix *res = malloc(sizeof(Matrix));
-    res->sizeX = 28;
-    res->sizeY = 28;
+    res->sizeX = 1;
+    res->sizeY = IMAGE_SIZE_FULL;
     res->data = malloc(784 * sizeof(double));
+    Uint32* pixels = nbr_image_resized->pixels;
     Uint8 r, g, b;
     for (int i = 0; i < 784; i++) {
         Uint32 pixel = pixels[i];
-        SDL_GetRGB(pixel, resized->format, &r, &g, &b);
-        printf("r: %u / g: %u / b: %u\n", r, g, b);
-        if ((r + g + b) / 3 > 128) res->data[i] = 1;
-        else res->data[i] = 0;
+        SDL_GetRGB(pixel, nbr_image_resized->format, &r, &g, &b);
+//        printf("r: %u / g: %u / b: %u\n", r, g, b);
+        if ((r + g + b) / 3 > 128) res->data[i] = 0;
+        else res->data[i] = 1;
     }
-    SDL_UnlockSurface(resized);
-    IMG_SavePNG(resized, "test.png");
-    SDL_FreeSurface(image);
-    SDL_FreeSurface(resized);
+//    IMG_SavePNG(nbr_image_resized, "resized_image.png");
+    SDL_FreeSurface(nbr_image);
+    SDL_FreeSurface(nbr_image_resized);
+    SDL_Quit();
     return res;
 }
