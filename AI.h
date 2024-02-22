@@ -2,15 +2,15 @@
 
 //TODO: to edit
 
-#define EPOCH 5          // number of training epochs
-#define DIMENSION 4         // depth of neural network, also modify hidden_layers in main.c
-#define LEARNING_RATE 0.005   // neural network learning rate
-#define X_TRAIN_SIZE 60000      // number of different entries
-#define Y_TRAIN_SIZE 784      // how many entries for 1 value (1, 1) for XOR for example
-#define OUTPUT_SIZE 10       // number of output neurons
+//#define EPOCH 5          // number of training epochs
+//#define DIMENSION 4         // depth of neural network, also modify hidden_layers in main.c
+//#define LEARNING_RATE 0.005   // neural network learning rate
+//#define X_TRAIN_SIZE 60000      // number of different entries
+//#define Y_TRAIN_SIZE 784      // how many entries for 1 value (1, 1) for XOR for example
+//#define OUTPUT_SIZE 10       // number of output neurons
 
 /* Example for XOR */
-//#define EPOCH 5
+//#define EPOCH 5000
 //#define DIMENSION 4
 //#define LEARNING_RATE 0.1
 //#define X_TRAIN_SIZE 4
@@ -18,12 +18,12 @@
 //#define OUTPUT_SIZE 1
 
 /* Example for MNIST */
-//#define EPOCH 32
-//#define DIMENSION 4
-//#define LEARNING_RATE 0.005
-//#define X_TRAIN_SIZE 60000
-//#define Y_TRAIN_SIZE 784
-//#define OUTPUT_SIZE 10
+#define EPOCH 4
+#define DIMENSION 4
+#define LEARNING_RATE 0.005
+#define X_TRAIN_SIZE 60000
+#define Y_TRAIN_SIZE 784
+#define OUTPUT_SIZE 10
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,16 +42,14 @@ typedef struct {
 } Matrix;
 
 // AI.c
-double random_gaussian();
 void init_network(int* dim, Matrix **W_list, Matrix **b_list);
-void forward_propagation(Matrix *X, Matrix *W_list, Matrix *b_list, Matrix **A);
-void back_propagation(Matrix *y, Matrix *W_list, Matrix *A_list, Matrix **dW_list, Matrix **db_list);
+void forward_propagation(Matrix *X, Matrix *W_list, Matrix *b_list, Matrix **A_list, int up);
+void back_propagation(Matrix *y, Matrix *W_list, Matrix *A_list, Matrix **dW_gradients, Matrix **db_gradients, int up);
 void update(Matrix *dW_gradients, Matrix *db_gradients, Matrix *W_list, Matrix *b_list);
 Matrix* predict(Matrix *X, Matrix *W_list, Matrix *b_list, int print_check);
 double accuracy(Matrix *X, Matrix *y, int test_size, Matrix *W_list, Matrix *b_list);
 double log_loss(Matrix *y, Matrix *A);
 void neural_network(Matrix **X, Matrix **y, int hidden_layers[], Matrix **W_list, Matrix **b_list, int update_net);     //update_net is to check if the network is juste updated
-//int predict_test(Matrix *X, double res, Matrix *W_list, Matrix *b_list);
 void save_network(Matrix *W_list, Matrix *b_list, char filename[], int epoch_nbr);
 int load_network(Matrix **W_list, Matrix **b_list, char filename[]);
 
@@ -73,4 +71,3 @@ Matrix* image_to_matrix(char filename[]);
 
 
 //TODO: extend limit of stack for mnist
-//TODO: update
