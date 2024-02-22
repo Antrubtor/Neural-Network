@@ -245,27 +245,16 @@ void neural_network(Matrix **X, Matrix **y, int hidden_layers[], Matrix **W_list
             free(dW_gradients);
             free(db_gradients);
         }
-        printf("Epoch number: %i\n", i);
-        printf("Accuracy: %f\n", accuracy(*X, *y, X_TRAIN_SIZE, *W_list, *b_list));
+        if (EPOCH < 10 || (EPOCH >= 10 && i % (EPOCH / 10) == 0)) {
+            Matrix *A_list;
+            forward_propagation(X[0], *W_list, *b_list, &A_list);   //useless after opti
+            printf("Epoch number: %i / Accuracy: %f / Log loss: %f\n", i, accuracy(*X, *y, X_TRAIN_SIZE, *W_list, *b_list), log_loss(y[0], &A_list[DIMENSION - 1]));
+            for (int j = 0; j < DIMENSION; j++)
+                free(A_list[j].data);
+            free(A_list);
+        }
     }
-    printf("Learning finished:\n\n");
-//    Matrix *A_list;
-//    forward_propagation(X, *W_list, *b_list, &A_list);
-//    printf("Log loss: %f\n", log_loss(y, &A_list[DIMENSION - 1]));
-//    printf("Accuracy: %.2f%%\n", accuracy(X, y, *W_list, *b_list) * 100);
-
-
-//    for (size_t i = 0; i < DIMENSION - 1; i++)
-//    {
-//        printf("W_list:\n");
-//        printMatrix((*W_list)[i]);
-//    }
-//    printf("\n\n\n\n\n\n\n\n\n\n");
-//    for (size_t i = 0; i < DIMENSION - 1; i++)
-//    {
-//        printf("b_list:\n");
-//        printMatrix((*b_list)[i]);
-//    }
+    printf("Learning finished !\n");
 }
 
 
