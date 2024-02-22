@@ -2,7 +2,7 @@
 
 //TODO: to edit
 
-#define EPOCH 10          // number of training epochs
+#define EPOCH 1          // number of training epochs
 #define DIMENSION 4         // depth of neural network, also modify hidden_layers in main.c
 #define LEARNING_RATE 0.005   // neural network learning rate
 #define X_TRAIN_SIZE 60000      // number of different entries
@@ -50,6 +50,7 @@ void forward_propagation(Matrix *X, Matrix *W_list, Matrix *b_list, Matrix **A);
 void back_propagation(Matrix *y, Matrix *W_list, Matrix *A_list, Matrix **dW_list, Matrix **db_list);
 void update(Matrix *dW_gradients, Matrix *db_gradients, Matrix *W_list, Matrix *b_list);
 Matrix* predict(Matrix *X, Matrix *W_list, Matrix *b_list, int print_check);
+double accuracy(Matrix *X, Matrix *y, int test_size, Matrix *W_list, Matrix *b_list);
 double log_loss(Matrix *y, Matrix *A);
 void neural_network(Matrix **X, Matrix **y, int hidden_layers[], Matrix **W_list, Matrix **b_list, int update_net);     //update_net is to check if the network is juste updated
 //int predict_test(Matrix *X, double res, Matrix *W_list, Matrix *b_list);
@@ -71,3 +72,7 @@ void printMatrix(Matrix mat);
 #define IMAGE_SIZE_FULL 784
 void load_mnist(char *filename_images, char *filename_labels, Matrix *images, Matrix *labels, int image_number);
 Matrix* image_to_matrix(char filename[]);
+
+
+//TODO: extend limit of stack for mnist
+//TODO: update

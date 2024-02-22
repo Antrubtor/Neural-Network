@@ -148,15 +148,19 @@ Matrix* predict(Matrix *X, Matrix *W_list, Matrix *b_list, int print_check)
             printf("%0.f, ", X->data[i]);
         printf("%.0f): ", X->data[X->sizeX * X->sizeY]);
     }
-
+    int max_pos = 0;
+    double max_nbr = 0;
     for (int i = 0; i < pre.sizeX * pre.sizeY; i++)
     {
+        if (pre.data[i] > max_nbr) {
+            max_nbr = pre.data[i];
+            max_pos = i;
+        }
         if (print_check)
             printf("%0.10f ", pre.data[i]);
-        double cons = 0;
-        if (pre.data[i] > 0.5) cons = 1;
-        res->data[i] = cons;
+        res->data[i] = 0;
     }
+    if (max_nbr > 0.5) res->data[max_pos] = 1;
     if (print_check)
         printf("\n");
     for (int i = 0; i < DIMENSION; i++)
@@ -165,23 +169,23 @@ Matrix* predict(Matrix *X, Matrix *W_list, Matrix *b_list, int print_check)
     return res;
 }
 
-double accuracy(Matrix *X, Matrix *y, Matrix *W_list, Matrix *b_list)
+double accuracy(Matrix *X, Matrix *y, int test_size, Matrix *W_list, Matrix *b_list)
 {
-    Matrix *Acti;
-    forward_propagation(X, W_list, b_list, &Acti);
-
-    Matrix *tmp_acti = &Acti[DIMENSION - 1];
-    double res = 0;
-    for (int i = 0; i < tmp_acti->sizeX; i++) {
-        double nb = 0;
-        if (tmp_acti->data[i] >= 0.5) nb = 1;
-        if (nb == y->data[i])
-            res ++;
+    double accuracy = 0;
+    for (int i = 0; i < test_size; i++) {
+        int add = 1;
+        Matrix *prediction = predict(&X[i], W_list, b_list, 0);
+        for (int j = 0; j < OUTPUT_SIZE; j++) {
+            if (fabs(prediction->data[j] - y[i].data[j]) > 0.01) {    //because malloc not really equal to 0
+                add = 0;
+                break;
+            }
+        }
+        accuracy += add;
+        free(prediction->data);
+        free(prediction);
     }
-    for (int i = 0; i < DIMENSION; i++)
-        free(Acti[i].data);
-    free(Acti);
-    return res / tmp_acti->sizeX;
+    return (accuracy / test_size) * 100;
 }
 
 
@@ -241,7 +245,8 @@ void neural_network(Matrix **X, Matrix **y, int hidden_layers[], Matrix **W_list
             free(dW_gradients);
             free(db_gradients);
         }
-//        printf("Epoch number: %i\n", i);
+        printf("Epoch number: %i\n", i);
+        printf("Accuracy: %f\n", accuracy(*X, *y, X_TRAIN_SIZE, *W_list, *b_list));
     }
     printf("Learning finished:\n\n");
 //    Matrix *A_list;

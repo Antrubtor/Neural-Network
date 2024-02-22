@@ -122,21 +122,7 @@ int main(int argc, char *argv[])
             char *filename_images_train = "data/t10k-images-idx3-ubyte";
             char *filename_labels_train = "data/t10k-labels-idx1-ubyte";
             load_mnist(filename_images_train, filename_labels_train, pre, res, nbr_image_test);
-            double accuracy = 0;
-            for (int i = 0; i < nbr_image_test; i++) {
-                int add = 1;
-                Matrix *prediction = predict(&pre[i], W_list, b_list, 0);
-                for (int j = 0; j < OUTPUT_SIZE; j++) {
-                    if (fabs(prediction->data[j] - res[i].data[j]) > 0.01) {    //because malloc not really equal to 0
-                        add = 0;
-                        break;
-                    }
-                }
-                accuracy += add;
-                free(prediction->data);
-                free(prediction);
-            }
-            printf("Accuracy: %.2f%% on MNIST test data\n", (accuracy / nbr_image_test) * 100);
+            printf("Accuracy: %.2f%% on MNIST test data\n", accuracy(pre, res, nbr_image_test, W_list, b_list));
 
             for (int i = 0; i < nbr_image_test; i++) {
                 free(pre[i].data);
