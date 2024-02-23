@@ -18,7 +18,7 @@
 //#define OUTPUT_SIZE 1
 
 /* Example for MNIST */
-#define EPOCH 4
+#define EPOCH 32
 #define DIMENSION 4
 #define LEARNING_RATE 0.005
 #define X_TRAIN_SIZE 60000

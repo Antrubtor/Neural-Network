@@ -11,8 +11,10 @@ void init_network(int dim[], Matrix **W_list, Matrix **b_list)
         tmp_W->sizeX = dim[i - 1];
         tmp_W->sizeY = dim[i];
         tmp_W->data = malloc(tmp_W->sizeX * tmp_W->sizeY * sizeof(double));
-        double lower = -(1.0 / sqrt(dim[i - 1]));
-        double upper = (1.0 / sqrt(dim[i - 1]));
+//        double lower = -(1.0 / sqrt(dim[i - 1]));  //Xavier Weight Initialization
+//        double upper = (1.0 / sqrt(dim[i - 1]));
+        double lower = -(sqrt(6.0) / sqrt(dim[i - 1] + dim[i])); //Normalized Xavier Weight Initialization
+        double upper = (sqrt(6.0) / sqrt(dim[i - 1] + dim[i]));
         for (int j = 0; j < tmp_W->sizeX * tmp_W->sizeY; j++)
             tmp_W->data[j] = lower + ((double)rand() / RAND_MAX) * (upper - lower);
         Matrix *tmp_b = &(*b_list)[i - 1];
@@ -163,7 +165,7 @@ Matrix* predict(Matrix *X, Matrix *W_list, Matrix *b_list, int print_check)
             printf("%0.10f ", pre.data[i]);
         res->data[i] = 0;
     }
-    if (max_nbr > 0.5) res->data[max_pos] = 1;
+    res->data[max_pos] = 1;
     if (print_check)
         printf("\n");
     for (int i = 0; i < DIMENSION; i++)
@@ -218,7 +220,11 @@ void neural_network(Matrix **X, Matrix **y, int hidden_layers[], Matrix **W_list
             update_status = 0;
         }
         if (EPOCH < 10 || (EPOCH >= 10 && i % (EPOCH / 10) == 0)) {
-            printf("Epoch number: %i / Accuracy: %f / Log loss: %f\n", i, accuracy(*X, *y, X_TRAIN_SIZE, *W_list, *b_list), log_loss(y[0], &A_list[DIMENSION - 1]));
+            printf("Epoch number: %i / ", i);
+            printf("Accuracy: %f / ", accuracy(*X, *y, X_TRAIN_SIZE, *W_list, *b_list));
+            printf("Log loss: %f", log_loss(y[0], &A_list[DIMENSION - 1]));
+            printf("\n");
+//            printf("Epoch number: %i / Accuracy: %f / Log loss: %f\n", i, accuracy(*X, *y, X_TRAIN_SIZE, *W_list, *b_list), log_loss(y[0], &A_list[DIMENSION - 1]));
         }
     }
 
