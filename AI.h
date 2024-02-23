@@ -10,20 +10,20 @@
 //#define OUTPUT_SIZE 10       // number of output neurons
 
 /* Example for XOR */
-//#define EPOCH 5000
-//#define DIMENSION 4
-//#define LEARNING_RATE 0.1
-//#define X_TRAIN_SIZE 4
-//#define Y_TRAIN_SIZE 2
-//#define OUTPUT_SIZE 1
+#define EPOCH 5000
+#define DIMENSION 4
+#define LEARNING_RATE 0.1
+#define X_TRAIN_SIZE 4
+#define Y_TRAIN_SIZE 2
+#define OUTPUT_SIZE 1
 
 /* Example for MNIST */
-#define EPOCH 32
-#define DIMENSION 4
-#define LEARNING_RATE 0.005
-#define X_TRAIN_SIZE 60000
-#define Y_TRAIN_SIZE 784
-#define OUTPUT_SIZE 10
+//#define EPOCH 32
+//#define DIMENSION 4
+//#define LEARNING_RATE 0.005
+//#define X_TRAIN_SIZE 60000
+//#define Y_TRAIN_SIZE 784
+//#define OUTPUT_SIZE 10
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -71,3 +71,4 @@ Matrix* image_to_matrix(char filename[]);
 
 
 //TODO: extend limit of stack for mnist
+//TODO: patch predict function

@@ -15,8 +15,8 @@ void init_network(int dim[], Matrix **W_list, Matrix **b_list)
 //        double upper = (1.0 / sqrt(dim[i - 1]));
         double lower = -(sqrt(6.0) / sqrt(dim[i - 1] + dim[i])); //Normalized Xavier Weight Initialization
         double upper = (sqrt(6.0) / sqrt(dim[i - 1] + dim[i]));
-        for (int j = 0; j < tmp_W->sizeX * tmp_W->sizeY; j++)
-            tmp_W->data[j] = lower + ((double)rand() / RAND_MAX) * (upper - lower);
+//        for (int j = 0; j < tmp_W->sizeX * tmp_W->sizeY; j++)
+//            /*tmp_W->data[j] = lower + ((double)rand() / RAND_MAX) * (upper - lower);*/ tmp_W->data[j] = ((double)rand() / RAND_MAX) * 2 - 1; //better for XOR
         Matrix *tmp_b = &(*b_list)[i - 1];
         tmp_b->sizeX = 1;
         tmp_b->sizeY = dim[i];
@@ -24,6 +24,27 @@ void init_network(int dim[], Matrix **W_list, Matrix **b_list)
         for (int j = 0; j < tmp_b->sizeY; j++)
             tmp_b->data[j] = 0.001;
     }
+    (&(*W_list)[0])->data[0] = 0.11;
+    (&(*W_list)[0])->data[1] = 0.21;
+    (&(*W_list)[0])->data[2] = 0.31;
+    (&(*W_list)[0])->data[3] = 0.41;
+    (&(*W_list)[0])->data[4] = 0.51;
+    (&(*W_list)[0])->data[5] = 0.61;
+    (&(*W_list)[0])->data[6] = 0.71;
+    (&(*W_list)[0])->data[7] = 0.81;
+
+    (&(*W_list)[1])->data[0] = 0.82;
+    (&(*W_list)[1])->data[1] = 0.72;
+    (&(*W_list)[1])->data[2] = 0.62;
+    (&(*W_list)[1])->data[3] = 0.52;
+
+
+    (&(*b_list)[0])->data[0] = -0.13;
+    (&(*b_list)[0])->data[1] = -0.23;
+    (&(*b_list)[0])->data[2] = -0.33;
+    (&(*b_list)[0])->data[3] = -0.43;
+
+    (&(*b_list)[1])->data[0] = 0.14;
 }
 
 void forward_propagation(Matrix *X, Matrix *W_list, Matrix *b_list, Matrix **A_list, int up)
@@ -38,16 +59,16 @@ void forward_propagation(Matrix *X, Matrix *W_list, Matrix *b_list, Matrix **A_l
         A_list[0]->data[i] = X->data[i];
     for (int i = 0; i < DIMENSION - 1; i++) {
         Matrix *Z = mul(&W_list[i], &(*A_list)[i]);
-        Matrix *tmp_A = &(*A_list)[i + 1];
+        Matrix *A = &(*A_list)[i + 1];
         if (up == 1) {
-            tmp_A->sizeX = Z->sizeX;
-            tmp_A->sizeY = Z->sizeY;
-            tmp_A->data = malloc(Z->sizeX * Z->sizeY * sizeof(double));
+            A->sizeX = Z->sizeX;
+            A->sizeY = Z->sizeY;
+            A->data = malloc(Z->sizeX * Z->sizeY * sizeof(double));
         }
         for (int j = 0; j < Z->sizeY ; j++) {
             for (int k = 0; k < Z->sizeX; k++) {
                 double tmp = Z->data[j * Z->sizeX + k] + b_list[i].data[j];
-                tmp_A->data[j * Z->sizeX + k] = 1 / (1 + exp(-(tmp)));
+                A->data[j * Z->sizeX + k] = 1 / (1 + exp(-(tmp)));
             }
         }
         free(Z->data);
@@ -63,30 +84,65 @@ void back_propagation(Matrix *y, Matrix *W_list, Matrix *A_list, Matrix **dW_gra
     }
     Matrix *dZ = minus(&A_list[DIMENSION - 1], y);
     for (int i = DIMENSION - 2; i >= 0; i--) {
-        Matrix *tmp_dW = &(*dW_gradients)[DIMENSION - 2 - i];
-        Matrix *tmp_tra_dW = transpose(&A_list[i]);
-        Matrix *tmp_mul_dW = mul(dZ, tmp_tra_dW);
+        Matrix *dW = &(*dW_gradients)[DIMENSION - 2 - i];
+        //dot(dZ, A[i].T)
+        int r1 = dZ->sizeY;
+        int c1 = dZ->sizeX;
+        int c2 = A_list[i].sizeY;
+        double *m1 = dZ->data;
+        double *m2 = A_list[i].data;
         if (up == 1) {
-            tmp_dW->sizeX = tmp_mul_dW->sizeX;
-            tmp_dW->sizeY = tmp_mul_dW->sizeY;
-            tmp_dW->data = malloc(tmp_mul_dW->sizeX * tmp_mul_dW->sizeY * sizeof(double));
+            dW->sizeX = c2;
+            dW->sizeY = r1;
+            dW->data = malloc(r1 * c2 * sizeof(double));
         }
-        for (int j = 0; j < tmp_mul_dW->sizeX * tmp_mul_dW->sizeY; j++)
-            tmp_dW->data[j] = tmp_mul_dW->data[j];// / X_TRAIN_SIZE;
+        for (int l = 0; l < r1; l++) {
+            for (int j = 0; j < c2; j++) {
+                double add = 0;
+                for (int k = 0; k < c1; k++) {
+                    add += m1[l * c1 + k] * m2[j * c1 + k];
+                }
+                dW->data[l * c2 + j] = add; // / X_TRAIN_SIZE;
+            }
+        }
 
-        Matrix *tmp_db = &(*db_gradients)[DIMENSION - 2 - i];
-        Matrix *tmp_sum_db = columns_sum(dZ);
+        Matrix *db = &(*db_gradients)[DIMENSION - 2 - i];
+        //sum(dZ)
         if (up == 1) {
-            tmp_db->sizeX = tmp_sum_db->sizeX;
-            tmp_db->sizeY = tmp_sum_db->sizeY;
-            tmp_db->data = malloc(tmp_sum_db->sizeX * tmp_sum_db->sizeY * sizeof(double));
+            db->sizeX = 1;
+            db->sizeY = dZ->sizeY;
+            db->data = malloc(db->sizeY * sizeof(double));
         }
-        for (int j = 0; j < tmp_sum_db->sizeX * tmp_sum_db->sizeY; j++)
-            tmp_db->data[j] = tmp_sum_db->data[j];// / X_TRAIN_SIZE;
+        for (int l = 0; l < dZ->sizeY; l++) {
+            double sum = 0;
+            for (int j = 0; j < dZ->sizeX; j++) {
+                sum += dZ->data[l * dZ->sizeX + j];
+            }
+            db->data[l] = sum; // / X_TRAIN_SIZE;
+        }
         if (i > 0)
         {
-            Matrix *tmp_t_dZ = transpose(&W_list[i]);
-            Matrix *tmp_mul_dZ = mul(tmp_t_dZ, dZ);
+            //dot(W[i].T, dZ)
+            r1 = W_list[i].sizeX;
+            c1 = W_list[i].sizeY;
+            c2 = dZ->sizeX;
+            m1 = W_list[i].data;
+            m2 = dZ->data;
+
+            Matrix *tmp_mul_dZ = malloc(sizeof(Matrix));
+            tmp_mul_dZ->sizeX = c2;
+            tmp_mul_dZ->sizeY = r1;
+            tmp_mul_dZ->data = malloc(c2 * r1 * sizeof(double));
+
+            for (int l = 0; l < r1; l++) {
+                for (int j = 0; j < c2; j++) {
+                    double add = 0;
+                    for (int k = 0; k < c1; k++) {
+                        add += m1[k * r1 + l] * m2[k * c2 + j];
+                    }
+                    tmp_mul_dZ->data[l * c2 + j] = add;
+                }
+            }
             Matrix *tmp_1_dZ = mul_matrix(tmp_mul_dZ, &A_list[i]);
             Matrix *min_dZ = malloc(sizeof(Matrix));
             min_dZ->sizeX = A_list[i].sizeX;
@@ -102,9 +158,6 @@ void back_propagation(Matrix *y, Matrix *W_list, Matrix *A_list, Matrix **dW_gra
             dZ->data = malloc(mul_dZ->sizeX * mul_dZ->sizeY * sizeof(double));
             for (int j = 0; j < mul_dZ->sizeX * mul_dZ->sizeY; j++)
                 dZ->data[j] = mul_dZ->data[j];
-
-            free(tmp_t_dZ->data);
-            free(tmp_t_dZ);
             free(tmp_mul_dZ->data);
             free(tmp_mul_dZ);
             free(tmp_1_dZ->data);
@@ -114,12 +167,6 @@ void back_propagation(Matrix *y, Matrix *W_list, Matrix *A_list, Matrix **dW_gra
             free(mul_dZ->data);
             free(mul_dZ);
         }
-        free(tmp_tra_dW->data);
-        free(tmp_tra_dW);
-        free(tmp_mul_dW->data);
-        free(tmp_mul_dW);
-        free(tmp_sum_db->data);
-        free(tmp_sum_db);
     }
     free(dZ->data);
     free(dZ);

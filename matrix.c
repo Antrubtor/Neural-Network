@@ -160,7 +160,7 @@ void printMatrix(Matrix mat)
     printf("Matrix size: %d x %d :\n", mat.sizeY, mat.sizeX);
     for (int i = 0; i < mat.sizeY; i++) {
         for (int j = 0; j < mat.sizeX; j++) {
-            printf("%.0f\t", mat.data[i * mat.sizeX + j]);
+            printf("%.5f\t", mat.data[i * mat.sizeX + j]);
         }
         printf("\n");
     }
