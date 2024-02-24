@@ -15,8 +15,10 @@ void init_network(int dim[], Matrix **W_list, Matrix **b_list)
 //        double upper = (1.0 / sqrt(dim[i - 1]));
         double lower = -(sqrt(6.0) / sqrt(dim[i - 1] + dim[i])); //Normalized Xavier Weight Initialization
         double upper = (sqrt(6.0) / sqrt(dim[i - 1] + dim[i]));
-//        for (int j = 0; j < tmp_W->sizeX * tmp_W->sizeY; j++)
-//            /*tmp_W->data[j] = lower + ((double)rand() / RAND_MAX) * (upper - lower);*/ tmp_W->data[j] = ((double)rand() / RAND_MAX) * 2 - 1; //better for XOR
+        for (int j = 0; j < tmp_W->sizeX * tmp_W->sizeY; j++) {
+            tmp_W->data[j] = lower + ((double)rand() / RAND_MAX) * (upper - lower); //better for MNIST
+//            tmp_W->data[j] =((double) rand() / RAND_MAX) * 2  -1; //better for XOR
+        }
         Matrix *tmp_b = &(*b_list)[i - 1];
         tmp_b->sizeX = 1;
         tmp_b->sizeY = dim[i];
@@ -24,27 +26,6 @@ void init_network(int dim[], Matrix **W_list, Matrix **b_list)
         for (int j = 0; j < tmp_b->sizeY; j++)
             tmp_b->data[j] = 0.001;
     }
-    (&(*W_list)[0])->data[0] = 0.11;
-    (&(*W_list)[0])->data[1] = 0.21;
-    (&(*W_list)[0])->data[2] = 0.31;
-    (&(*W_list)[0])->data[3] = 0.41;
-    (&(*W_list)[0])->data[4] = 0.51;
-    (&(*W_list)[0])->data[5] = 0.61;
-    (&(*W_list)[0])->data[6] = 0.71;
-    (&(*W_list)[0])->data[7] = 0.81;
-
-    (&(*W_list)[1])->data[0] = 0.82;
-    (&(*W_list)[1])->data[1] = 0.72;
-    (&(*W_list)[1])->data[2] = 0.62;
-    (&(*W_list)[1])->data[3] = 0.52;
-
-
-    (&(*b_list)[0])->data[0] = -0.13;
-    (&(*b_list)[0])->data[1] = -0.23;
-    (&(*b_list)[0])->data[2] = -0.33;
-    (&(*b_list)[0])->data[3] = -0.43;
-
-    (&(*b_list)[1])->data[0] = 0.14;
 }
 
 void forward_propagation(Matrix *X, Matrix *W_list, Matrix *b_list, Matrix **A_list, int up)
@@ -68,7 +49,7 @@ void forward_propagation(Matrix *X, Matrix *W_list, Matrix *b_list, Matrix **A_l
         for (int j = 0; j < Z->sizeY ; j++) {
             for (int k = 0; k < Z->sizeX; k++) {
                 double tmp = Z->data[j * Z->sizeX + k] + b_list[i].data[j];
-                A->data[j * Z->sizeX + k] = 1 / (1 + exp(-(tmp)));
+                A->data[j * Z->sizeX + k] = 1 / (1 + exp(-(tmp)));  //sigmoid
             }
         }
         free(Z->data);
@@ -129,10 +110,10 @@ void back_propagation(Matrix *y, Matrix *W_list, Matrix *A_list, Matrix **dW_gra
             m1 = W_list[i].data;
             m2 = dZ->data;
 
-            Matrix *tmp_mul_dZ = malloc(sizeof(Matrix));
-            tmp_mul_dZ->sizeX = c2;
-            tmp_mul_dZ->sizeY = r1;
-            tmp_mul_dZ->data = malloc(c2 * r1 * sizeof(double));
+            Matrix *tmp_dZ = malloc(sizeof(Matrix));
+            tmp_dZ->sizeX = c2;
+            tmp_dZ->sizeY = r1;
+            tmp_dZ->data = malloc(c2 * r1 * sizeof(double));
 
             for (int l = 0; l < r1; l++) {
                 for (int j = 0; j < c2; j++) {
@@ -140,38 +121,23 @@ void back_propagation(Matrix *y, Matrix *W_list, Matrix *A_list, Matrix **dW_gra
                     for (int k = 0; k < c1; k++) {
                         add += m1[k * r1 + l] * m2[k * c2 + j];
                     }
-                    tmp_mul_dZ->data[l * c2 + j] = add;
+                    tmp_dZ->data[l * c2 + j] = add;
                 }
             }
-            Matrix *tmp_1_dZ = mul_matrix(tmp_mul_dZ, &A_list[i]);
-            Matrix *min_dZ = malloc(sizeof(Matrix));
-            min_dZ->sizeX = A_list[i].sizeX;
-            min_dZ->sizeY = A_list[i].sizeY;
-            min_dZ->data = malloc(min_dZ->sizeX * min_dZ->sizeY * sizeof(Matrix));
-            for (int j = 0; j < min_dZ->sizeX * min_dZ->sizeY; j++)
-                min_dZ->data[j] = 1 - A_list[i].data[j];
-            Matrix *mul_dZ = mul_matrix(tmp_1_dZ, min_dZ);
-
-            dZ->sizeX = mul_dZ->sizeX;
-            dZ->sizeY = mul_dZ->sizeY;
+            //tmp_dZ * A[i] * (1 - A[i])
+            dZ->sizeX = tmp_dZ->sizeX;
+            dZ->sizeY = tmp_dZ->sizeY;
             free(dZ->data);
-            dZ->data = malloc(mul_dZ->sizeX * mul_dZ->sizeY * sizeof(double));
-            for (int j = 0; j < mul_dZ->sizeX * mul_dZ->sizeY; j++)
-                dZ->data[j] = mul_dZ->data[j];
-            free(tmp_mul_dZ->data);
-            free(tmp_mul_dZ);
-            free(tmp_1_dZ->data);
-            free(tmp_1_dZ);
-            free(min_dZ->data);
-            free(min_dZ);
-            free(mul_dZ->data);
-            free(mul_dZ);
+            dZ->data = malloc(tmp_dZ->sizeX * tmp_dZ->sizeY * sizeof(double));
+            for (int j = 0; j < tmp_dZ->sizeX * tmp_dZ->sizeY; j++)
+                dZ->data[j] = tmp_dZ->data[j] * A_list[i].data[j] * (1 - A_list[i].data[j]);
+            free(tmp_dZ->data);
+            free(tmp_dZ);
         }
     }
     free(dZ->data);
     free(dZ);
 }
-
 
 void update(Matrix *dW_gradients, Matrix *db_gradients, Matrix *W_list, Matrix *b_list)
 {
@@ -197,11 +163,11 @@ Matrix* predict(Matrix *X, Matrix *W_list, Matrix *b_list, int print_check)
     if (print_check) {
         printf("Predict for (");
         for (int i = 0; i < X->sizeX * X->sizeY - 1; i++)
-            printf("%0.f, ", X->data[i]);
-        printf("%.0f): ", X->data[X->sizeX * X->sizeY]);
+            printf("%.0f, ", X->data[i]);
+        printf("%.0f): ", X->data[X->sizeX * X->sizeY - 1]);
     }
     int max_pos = 0;
-    double max_nbr = 0;
+    double max_nbr = pre.data[0];
     for (int i = 0; i < pre.sizeX * pre.sizeY; i++)
     {
         if (pre.data[i] > max_nbr) {
@@ -212,7 +178,8 @@ Matrix* predict(Matrix *X, Matrix *W_list, Matrix *b_list, int print_check)
             printf("%0.10f ", pre.data[i]);
         res->data[i] = 0;
     }
-    res->data[max_pos] = 1;
+    if (max_nbr >= 0.3)     //sensibility
+        res->data[max_pos] = 1;
     if (print_check)
         printf("\n");
     for (int i = 0; i < DIMENSION; i++)
@@ -239,7 +206,6 @@ double accuracy(Matrix *X, Matrix *y, int test_size, Matrix *W_list, Matrix *b_l
     }
     return (accuracy / test_size) * 100;
 }
-
 
 double log_loss(Matrix *y, Matrix *A)
 {
@@ -268,10 +234,11 @@ void neural_network(Matrix **X, Matrix **y, int hidden_layers[], Matrix **W_list
         }
         if (EPOCH < 10 || (EPOCH >= 10 && i % (EPOCH / 10) == 0)) {
             printf("Epoch number: %i / ", i);
-            printf("Accuracy: %f / ", accuracy(*X, *y, X_TRAIN_SIZE, *W_list, *b_list));
-            printf("Log loss: %f", log_loss(y[0], &A_list[DIMENSION - 1]));
+            printf("Accuracy: %.2f%% / ", accuracy(*X, *y, X_TRAIN_SIZE, *W_list, *b_list));
+            printf("Log loss: %f / ", log_loss(y[0], &A_list[DIMENSION - 1]));
+            struct timeval actual_time; gettimeofday(&actual_time, NULL); struct tm* temps_info = localtime(&actual_time.tv_sec);
+            printf("Time: %02d:%02d:%02d:%03d", temps_info->tm_hour, temps_info->tm_min, temps_info->tm_sec, (int)(actual_time.tv_usec / 1000));
             printf("\n");
-//            printf("Epoch number: %i / Accuracy: %f / Log loss: %f\n", i, accuracy(*X, *y, X_TRAIN_SIZE, *W_list, *b_list), log_loss(y[0], &A_list[DIMENSION - 1]));
         }
     }
 
