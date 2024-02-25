@@ -15,14 +15,14 @@ int main(int argc, char *argv[])
     if (argc > 1 && (strcmp(argv[1], "XOR") == 0 || strcmp(argv[1], "UXOR") == 0))
     {
         printf("Learning and saving the network for XOR data\n");
-        double Xx[X_TRAIN_SIZE][Y_TRAIN_SIZE] = {
+        double Xx[4][2] = {
                 {1, 1},
                 {0, 1},
                 {1, 0},
                 {0, 0}
         };
 
-        double yy[X_TRAIN_SIZE] = {
+        double yy[4] = {
                 0,
                 1,
                 1,

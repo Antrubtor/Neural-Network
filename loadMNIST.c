@@ -47,11 +47,9 @@ Matrix* image_to_matrix(char filename[])
     for (int i = 0; i < 784; i++) {
         Uint32 pixel = pixels[i];
         SDL_GetRGB(pixel, nbr_image_resized->format, &r, &g, &b);
-//        printf("r: %u / g: %u / b: %u\n", r, g, b);
         if ((r + g + b) / 3 > 128) res->data[i] = 0;
         else res->data[i] = 1;
     }
-//    IMG_SavePNG(nbr_image_resized, "resized_image.png");
     SDL_FreeSurface(nbr_image);
     SDL_FreeSurface(nbr_image_resized);
     SDL_Quit();

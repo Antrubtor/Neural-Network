@@ -25,12 +25,13 @@ $ ./main UMNIST   // Retrains the network for image recognition using the MNIST 
 $ ./main TXOR     // Tests the trained neural network with XOR values
 $ ./main TMNIST1  // Tests the trained neural network with the MNIST training dataset
 $ ./main TMNIST2  // Tests the trained neural network with a custom image located in the img/test_img.png directory
+$ make clean
 ```
 
 You can directly test the network after training by appending the testing command. For example:
 
 ```
-$ ./main UXOR TMNIST2
+$ ./main UMNIST TMNIST2
 ```
 
 The network will be retrained for XOR learning, and then it will be tested with a custom image.

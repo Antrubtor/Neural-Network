@@ -116,7 +116,7 @@ Matrix* mul(Matrix *matrix1, Matrix *matrix2)
     return matrixR;
 }
 
-Matrix* mul_matrix(Matrix *matrix1, Matrix *matrix2)   //multiply every number from m1 to m2
+Matrix* mul_matrix(Matrix *matrix1, Matrix *matrix2)
 {
     int rows = matrix1->sizeY;
     int cols = matrix1->sizeX;

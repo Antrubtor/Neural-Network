@@ -161,7 +161,7 @@ Matrix* predict(Matrix *X, Matrix *W_list, Matrix *b_list, int print_check)
     res->data = malloc(res->sizeX * res->sizeY * sizeof(double));
 
     if (print_check) {
-        printf("Predict for (");
+        printf("Prediction for (");
         for (int i = 0; i < X->sizeX * X->sizeY - 1; i++)
             printf("%.0f, ", X->data[i]);
         printf("%.0f): ", X->data[X->sizeX * X->sizeY - 1]);
@@ -255,7 +255,6 @@ void neural_network(Matrix **X, Matrix **y, int hidden_layers[], Matrix **W_list
 
     printf("Learning finished !\n");
 }
-
 
 void save_network(Matrix *W_list, Matrix *b_list, char filename[], int epoch_nbr)
 {

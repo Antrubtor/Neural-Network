@@ -1,13 +1,11 @@
 #pragma once
 
-//TODO: to edit
-
-#define EPOCH 5          // number of training epochs
+#define EPOCH 10000         // number of training epochs
 #define DIMENSION 4         // depth of neural network, also modify hidden_layers in main.c
-#define LEARNING_RATE 0.005   // neural network learning rate
-#define X_TRAIN_SIZE 60000      // number of different entries
-#define Y_TRAIN_SIZE 784      // how many entries for 1 value (1, 1) for XOR for example
-#define OUTPUT_SIZE 10       // number of output neurons
+#define LEARNING_RATE 0.1   // neural network learning rate
+#define X_TRAIN_SIZE 4      // number of different entries
+#define Y_TRAIN_SIZE 2      // how many entries for 1 value (1, 1) for XOR for example
+#define OUTPUT_SIZE 1       // number of output neurons
 
 /* Example for XOR */
 //#define EPOCH 100000
@@ -69,7 +67,3 @@ void printMatrix(Matrix mat);
 #define IMAGE_SIZE_FULL 784
 void load_mnist(char *filename_images, char *filename_labels, Matrix *images, Matrix *labels, int image_number);
 Matrix* image_to_matrix(char filename[]);
-
-
-//TODO: extend limit of stack for mnist
-//TODO: patch predict function
