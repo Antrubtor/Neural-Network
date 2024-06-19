@@ -4,7 +4,7 @@ This project is a simple implementation of a neural network capable of learning 
 
 ## Description
 
-The neural network is implemented in C++ and initially designed to learn the XOR logical function. It includes functionality for recognizing digits in images using the MNIST dataset.
+The neural network is implemented in C and initially designed to learn the XOR logical function. It includes functionality for recognizing digits in images using the MNIST dataset.
 
 The goal is to demonstrate the fundamental operations of a neural network and its ability to solve both classification and image recognition problems.
 
